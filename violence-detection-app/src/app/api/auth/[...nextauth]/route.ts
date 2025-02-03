@@ -69,13 +69,14 @@
 // const handler = NextAuth(authOptions);
 // export { handler as GET, handler as POST };
 
+// pages/api/auth/[...nextauth].ts
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 import clientPromise from "@/lib/mongodb";
-import { Session, User as NextAuthUser } from "next-auth";
+import { Session, User as NextAuthUser, Account, Profile } from "next-auth";
 
-// กำหนดประเภทของ `user` ในระบบของเราเอง
+// Define User and Session types
 type User = {
   id: string;
   name: string;
@@ -85,7 +86,7 @@ type User = {
 
 type SessionStrategy = "jwt" | "database";
 
-// ขยายประเภท `Session` และ `User` ของ NextAuth
+// Extend types for Session and User
 declare module "next-auth" {
   interface Session {
     user: {
@@ -107,57 +108,56 @@ declare module "next-auth" {
 export const authOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,  // ใช้ค่าใน .env.local
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,  // ใช้ค่าใน .env.local
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
-  adapter: MongoDBAdapter(clientPromise),  // ใช้ MongoDB Adapter สำหรับการเชื่อมต่อฐานข้อมูล
+  adapter: MongoDBAdapter(clientPromise),
   session: {
-    strategy: "jwt" as SessionStrategy,  // ใช้ JWT สำหรับ session
+    strategy: "jwt" as SessionStrategy, // Define session strategy as "jwt" or "database"
   },
   callbacks: {
-    // Callback สำหรับ signIn
-    async signIn({ user, account, profile }: { user: User; account: any; profile: any }) {
-      // ตรวจสอบหาก user ยังไม่มีในฐานข้อมูล (ใหม่)
-      const existingUser = await checkIfUserExists(user.email);
-      
-      if (!existingUser) {
-        // สร้างผู้ใช้ใหม่ในระบบฐานข้อมูล MongoDB
-        await createNewUser(user);
-      }
-      
-      // แสดงข้อมูล user, account, profile
+    async signIn({ user, account, profile }: { user: NextAuthUser; account: Account | null; profile?: Profile }) {
       console.log("User:", user);
       console.log("Account:", account);
       console.log("Profile:", profile);
-      return true;  // ถ้าไม่มีข้อผิดพลาดให้ return true
+
+      if (account?.provider === "google") {
+        const userExists = await checkIfUserExists(user.email);
+        if (!userExists) {
+          await createUserInDatabase(user);
+        }
+      }
+
+      return true;
     },
-    // Callback สำหรับ session
-    async session({ session, user }: { session: Session; user: User }) {
+    async session({ session, user }: { session: Session; user: NextAuthUser }) {
       if (session.user) {
-        session.user.id = user.id;  // ทำการตั้งค่า `id` ของ user จาก MongoDB
+        session.user.id = user.id;
       }
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,  // ใช้ค่าใน .env.local
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
-// ฟังก์ชันเพื่อตรวจสอบว่าผู้ใช้มีในฐานข้อมูลหรือไม่
+// Function to check if the user exists in the database
 async function checkIfUserExists(email: string) {
-  // ตัวอย่างการตรวจสอบข้อมูลผู้ใช้ใน MongoDB
-  const user = await (await clientPromise).db().collection("users").findOne({ email });
-  return user;
+  const client = await clientPromise;
+  const db = client.db(); // Access the database
+  const user = await db.collection("users").findOne({ email });
+  return user !== null;
 }
 
-// ฟังก์ชันสำหรับสร้างผู้ใช้ใหม่ในฐานข้อมูล
-async function createNewUser(user: User) {
-  // ตัวอย่างการสร้างผู้ใช้ใหม่ใน MongoDB
-  await (await clientPromise).db().collection("users").insertOne({
+// Function to create a new user in the database
+async function createUserInDatabase(user: NextAuthUser) {
+  const client = await clientPromise;
+  const db = client.db(); // Access the database
+  await db.collection("users").insertOne({
+    id: user.id,
     name: user.name,
     email: user.email,
-    image: user.image || "",
-    createdAt: new Date(),
+    image: user.image,
   });
 }
 
