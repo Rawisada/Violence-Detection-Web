@@ -1,24 +1,31 @@
-import { MongoClient } from "mongodb";
 
-const MONGODB_URI = process.env.MONGODB_URI;
-console.log("MONGODB_URI", MONGODB_URI)
-console.log("GOOGLE_CLIENT_ID", process.env.GOOGLE_CLIENT_ID)
+import mongoose from "mongoose";
+
+const MONGODB_URI = process.env.MONGODB_URI!;
+
 if (!MONGODB_URI) {
   throw new Error("Please define MONGODB_URI in .env.local");
 }
 
-let clientPromise: Promise<MongoClient>;
+// ใช้ global cache เพื่อหลีกเลี่ยงการสร้าง connection ซ้ำใน development mode
+let cached = (global as any).mongoose || { conn: null, promise: null };
 
-if (process.env.NODE_ENV === "development") {
-  // ใช้ global เพื่อป้องกันการเชื่อมต่อซ้ำใน development
-  if (!(global as any)._mongoClientPromise) {
-    const client = new MongoClient(MONGODB_URI);
-    (global as any)._mongoClientPromise = client.connect();
+async function dbConnect() {
+  if (cached.conn) {
+    return cached.conn;
   }
-  clientPromise = (global as any)._mongoClientPromise;
-} else {
-  // ใช้เชื่อมต่อใหม่ใน production
-  clientPromise = new MongoClient(MONGODB_URI).connect();
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGODB_URI, {
+      dbName: "test", // 🔹 เปลี่ยนเป็นชื่อ database ที่ต้องการ
+    }).then((mongoose) => mongoose);
+  }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
 }
 
-export default clientPromise;
+// เก็บ connection ไว้ใน global เพื่อป้องกันการเชื่อมต่อซ้ำในโหมด Development
+(global as any).mongoose = cached;
+
+export default dbConnect;
