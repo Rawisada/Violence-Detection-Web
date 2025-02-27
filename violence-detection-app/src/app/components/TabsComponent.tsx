@@ -4,6 +4,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import { handleSignOut } from '@/lib/auth';
 import LiveFeedComponent from './LiveFeedComponent';
+import VideoStorageComponent from './VideoStorageComponent';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -12,7 +13,7 @@ interface TabPanelProps {
 }
 
 interface TabProps {
-  session: any; // คุณสามารถกำหนด type ที่เฉพาะเจาะจงมากขึ้น เช่น Session จาก next-auth
+  session: any;
 }
 
 function CustomTabPanel(props: TabPanelProps) {
@@ -54,14 +55,14 @@ export default function TabsComponent({ session }: TabProps) {
         borderColor: "divider",
         alignItems: "center",}}>
         <Tabs value={value} onChange={handleChange} aria-label="basic tabs example" sx={{
-            flexGrow: 1, // เพื่อให้แท็บใช้พื้นที่เต็มด้านซ้าย
+            flexGrow: 1, 
           }}>
           <Tab label="Live Feed" {...a11yProps(0)} />
           <Tab label="Video Storage" {...a11yProps(1)} />
           <Tab label="Summary" {...a11yProps(2)} />
           <Tab label="System Setting" {...a11yProps(3)} />
         </Tabs>
-        <p className='mr-3'>{session.user?.name}</p>
+        <p className='mr-3 text-black'>{session.user?.name}</p>
         <Tab
             {...a11yProps(4)}
             component="button"
@@ -81,7 +82,7 @@ export default function TabsComponent({ session }: TabProps) {
         <LiveFeedComponent/>
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
-        Item Two
+        <VideoStorageComponent/>
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
         Item Tree

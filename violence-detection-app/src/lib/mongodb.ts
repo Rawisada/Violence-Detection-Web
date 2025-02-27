@@ -17,7 +17,7 @@ async function dbConnect() {
 
   if (!cached.promise) {
     cached.promise = mongoose.connect(MONGODB_URI, {
-      dbName: "test", // 🔹 เปลี่ยนเป็นชื่อ database ที่ต้องการ
+      dbName: "violence_detection", // 🔹 เปลี่ยนเป็นชื่อ database ที่ต้องการ
     }).then((mongoose) => mongoose);
   }
 

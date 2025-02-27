@@ -39,13 +39,16 @@ export const authOptions: AuthOptions = {
 
         // Check if user already exists in the databas
         const existingUser = await User.findOne({ email: user.email });
-
+        const nameParts = user.name.split(" "); // แยกด้วยช่องว่าง
+        const firstName = nameParts[0]; // ชื่อแรกสุด
+        const lastName = nameParts.slice(1).join(" "); // รวมคำที่เหลือเป็น lastName
         // If the user doesn't exist, create a new user
         if (!existingUser) {
           const newUser = new User({
             email: user.email,
             profile: {
-              firstName: user.name,
+              firstName: firstName,
+              lastName: lastName,
               image: user.image,
             },
           });
@@ -76,129 +79,3 @@ export const authOptions: AuthOptions = {
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
-
-// // Define User and Session types
-// type User = {
-//   id: string;
-//   name: string;
-//   email: string;
-//   image?: string;
-// };
-
-// type SessionStrategy = "jwt" | "database";
-
-// // Extend types for Session and User
-// declare module "next-auth" {
-//   interface Session {
-//     user: {
-//       id: string;
-//       name: string;
-//       email: string;
-//       image?: string;
-//     };
-//   }
-
-//   interface User {
-//     id: string;
-//     name: string;
-//     email: string;
-//     image?: string;
-//   }
-// }
-
-
-// export const authOptions = {
-//   providers: [
-//     GoogleProvider({
-//       clientId: process.env.GOOGLE_CLIENT_ID || (() => { throw new Error("Missing GOOGLE_CLIENT_ID") })(),
-//       clientSecret: process.env.GOOGLE_CLIENT_SECRET || (() => { throw new Error("Missing GOOGLE_CLIENT_SECRET") })(),
-//       authorization: {
-//         url: "https://accounts.google.com/o/oauth2/auth",
-//         params: {
-//           scope: "openid email profile",
-//           prompt: "consent",  // บังคับให้ Google ถามก่อนล็อกอิน
-//           access_type: "offline",
-//           response_type: "code",
-//         },
-//       },
-//     }),
-//   ],
-//   adapter: MongoDBAdapter(clientPromise),
-//   session: {
-//     strategy: "jwt" as SessionStrategy, // Define session strategy as "jwt" or "database"
-//   },
-//   callbacks: {
-//     async signIn({ user, account }: { user: NextAuthUser; account?: Account }) {
-//       if (!user.email) return false;
-  
-//       const client = await clientPromise;
-//       const db = client.db();
-//       const existingUser = await db.collection("users").findOne({ email: user.email });
-  
-//       if (!existingUser) {
-//         if (account?.provider === "google") {
-//           await db.collection("users").insertOne({
-//             id: user.id,
-//             name: user.name,
-//             email: user.email,
-//             image: user.image,
-//             providers: [account.provider], // 🔥 เพิ่ม field providers
-//           });
-//           return true;
-//         }
-//         return false;
-//       }
-  
-//       // ✅ เชื่อมโยง provider ใหม่กับบัญชีเดิม
-//       if (!existingUser.providers.includes(account?.provider)) {
-//         await db.collection("users").updateOne(
-//           { email: user.email },
-//           { $addToSet: { providers: account?.provider } }
-//         );
-//       }
-  
-//       return true;
-//     },
-//     async session({ session }: { session: Session }) {
-//       if (session.user) {
-//         const client = await clientPromise;
-//         const db = client.db();
-        
-//         const dbUser = await db.collection("users").findOne({ email: session.user.email });
-
-//         if (dbUser) {
-//           session.user.id = dbUser.id;
-//         }
-//       }
-//       return session;
-//     },
-
-//     async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
-//       return `${baseUrl}/home`; // Redirect ไปที่หน้า Home หลังจากล็อกอิน
-//     },
-//   },
-//   secret: process.env.NEXTAUTH_SECRET,
-// };
-
-// // Function to check if the user exists in the database
-// async function checkIfUserExists(email: string) {
-//   const client = await clientPromise;
-//   const db = client.db(); // Access the database
-//   const user = await db.collection("users").findOne({ email });
-//   return user !== null;
-// }
-
-// // Function to create a new user in the database
-// async function createUserInDatabase(user: NextAuthUser) {
-//   const client = await clientPromise;
-//   const db = client.db(); // Access the database
-//   await db.collection("users").insertOne({
-//     id: user.id,
-//     name: user.name,
-//     email: user.email,
-//     image: user.image,
-//   });
-// }
-
-// const handler = NextAuth(authOptions);
-// export { handler as GET, handler as POST };
