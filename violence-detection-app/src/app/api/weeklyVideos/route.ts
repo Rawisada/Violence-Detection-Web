@@ -1,23 +1,21 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import Violence from "@/models/Violence";
+import WeeklyVideos from "@/models/WeeklyVideos";
 
-// GET: ดึงข้อมูลตามวัน
+
 export async function GET(req: Request) {
   await dbConnect();
   const { searchParams } = new URL(req.url);
   const date = searchParams.get("date");
   const camera = searchParams.get("camera")?.split(",");
-  const type = searchParams.get("type")?.split(",").map(Number); 
 
   try {
     let filter: any = {};
 
     if (date) filter.date = date;
     if (camera) filter.camera = camera;
-    if (type && type.length > 0) filter.type = { $in: type };
 
-    const data = await Violence.find(filter).sort({ createdAt: -1 });
+    const data = await WeeklyVideos.find(filter).sort({ createdAt: -1 });
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
@@ -31,12 +29,12 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     
-    if (!body.videoName || !body.type || !body.date || !body.time || !body.videoPath || !body.camera || !body.fileSize) {
+    if (!body.videoName || !body.date || !body.videoPath || !body.camera || !body.fileSize) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
-    const newViolence = await Violence.create(body);
-    return NextResponse.json({ success: true, data: newViolence }, { status: 201 });
+    const newWeeklyVideos = await WeeklyVideos.create(body);
+    return NextResponse.json({ success: true, data: newWeeklyVideos }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
   }

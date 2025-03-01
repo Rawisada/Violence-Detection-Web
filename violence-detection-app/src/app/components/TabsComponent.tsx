@@ -1,49 +1,59 @@
-import * as React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import { handleSignOut } from '@/lib/auth';
-import LiveFeedComponent from './LiveFeedComponent';
-import VideoStorageComponent from './VideoStorageComponent';
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Image from 'next/image';
 
 interface TabProps {
   session: any;
 }
 
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-      
-    >
-      {value === index && <Box sx={{ padding: 0, margin: 0, height: "100%" }}>{children}</Box>}
-    </div>
-  );
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
-  };
-}
-
 export default function TabsComponent({ session }: TabProps) {
-  const [value, setValue] = React.useState(0);
+  const pathname = usePathname();
+  console.log('Current Pathname:', pathname);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+      setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+      setAnchorEl(null);
+  };
+
+  const getValueFromPathname = (path: string) => {
+    if (path === '/liveFeed') return 'one';
+    if (path ==='/videoStorageWeekly'  || path === '/videoStorageViolence') return 'two';
+    if (path === '/summary') return 'three';
+    if (path === '/systemSetting') return 'four';
+    return 'one';
+  };
+
+  const [value, setValue] = React.useState<string>(getValueFromPathname(pathname));
+
+  React.useEffect(() => {
+    setValue(getValueFromPathname(pathname));
+    if (pathname === '/videoStorage/weekly') {
+      setSelectedMenu('weekly');
+    } else if (pathname === '/videoStorageViolence') {
+      setSelectedMenu('violence');
+    } else {
+      setSelectedMenu(null);
+    }
+  }, [pathname]);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
 
@@ -53,18 +63,66 @@ export default function TabsComponent({ session }: TabProps) {
         display: "flex",
         borderBottom: 1,
         borderColor: "divider",
-        alignItems: "center",}}>
+        alignItems: "center",
+        paddingLeft: 5,
+        paddingRight: 5
+        }}
+      >
+        <div className="bg-gray-900 rounded-full p-1 flex items-center justify-center w-8 h-8 mr-5">
+          <Image
+            src="/logo.png"
+            alt="Camera Icon"
+            width={20}
+            height={20}
+            className="rounded-full"
+          />
+        </div>
         <Tabs value={value} onChange={handleChange} aria-label="basic tabs example" sx={{
             flexGrow: 1, 
           }}>
-          <Tab label="Live Feed" {...a11yProps(0)} />
-          <Tab label="Video Storage" {...a11yProps(1)} />
-          <Tab label="Summary" {...a11yProps(2)} />
-          <Tab label="System Setting" {...a11yProps(3)} />
+          <Tab value="one" component={Link} href="/liveFeed" label="Live Feed"  />
+          {/* <Tab value="two" component={Link} href="/videoStorage" label="Video Storage" /> */}
+          <Tab
+            value="two"
+            label={
+              <Box display="flex" alignItems="center" gap={0.5}>
+                  Video Storage <ExpandMoreIcon />
+              </Box>
+            }
+            onClick={handleClick} 
+            aria-controls={open ? 'video-storage-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+
+          />
+          <Tab value="three" label="Summary" />
+          <Tab value="four" label="System Setting"  />
         </Tabs>
-        <p className='mr-3 text-black'>{session.user?.name}</p>
-        <Tab
-            {...a11yProps(4)}
+
+        <Menu
+          id="video-storage-menu"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          PaperProps={{
+            sx: {
+                width: '170px',  
+            }
+        }}
+        >
+          <MenuItem onClick={handleClose} component={Link} href="/videoStorageWeekly" selected={selectedMenu === 'weekly'}>
+              Weekly Videos
+          </MenuItem>
+          <MenuItem onClick={handleClose} component={Link} href="/videoStorageViolence" selected={selectedMenu === 'violence'}>
+              Violence Videos
+          </MenuItem>
+        </Menu>
+
+        <div className=' border-r-1 border-gray-500'>
+          <p className='mr-3 text-black border-r-1 border-gray-500'>{session.user?.name}</p>
+        </div>
+     
+        <Tab 
             component="button"
             onClick={handleSignOut}
             label='Sign Out'
@@ -78,21 +136,6 @@ export default function TabsComponent({ session }: TabProps) {
             }}
           />
       </Box>
-      <CustomTabPanel value={value} index={0} >
-        <LiveFeedComponent/>
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={1}>
-        <VideoStorageComponent/>
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={2}>
-        Item Tree
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={3}>
-
-      </CustomTabPanel>
-      <CustomTabPanel value={value} index={4}>
-
-      </CustomTabPanel>
     </Box>
     );
 }

@@ -4,10 +4,10 @@ import axios from "axios"; // หรือ Fetch API ก็ได้
 interface ViolenceData {
   id: number;
   videoName: string;
-  type: number;
+  type: number; 
   date: string;
   time: string;
-  videoLink: string;
+  videoPath: string;
   camera: number
 }
 

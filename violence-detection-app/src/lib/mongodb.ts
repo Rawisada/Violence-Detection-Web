@@ -7,7 +7,6 @@ if (!MONGODB_URI) {
   throw new Error("Please define MONGODB_URI in .env.local");
 }
 
-// ใช้ global cache เพื่อหลีกเลี่ยงการสร้าง connection ซ้ำใน development mode
 let cached = (global as any).mongoose || { conn: null, promise: null };
 
 async function dbConnect() {
@@ -17,7 +16,7 @@ async function dbConnect() {
 
   if (!cached.promise) {
     cached.promise = mongoose.connect(MONGODB_URI, {
-      dbName: "violence_detection", // 🔹 เปลี่ยนเป็นชื่อ database ที่ต้องการ
+      dbName: "violence_detection",
     }).then((mongoose) => mongoose);
   }
 
@@ -25,7 +24,6 @@ async function dbConnect() {
   return cached.conn;
 }
 
-// เก็บ connection ไว้ใน global เพื่อป้องกันการเชื่อมต่อซ้ำในโหมด Development
 (global as any).mongoose = cached;
 
 export default dbConnect;

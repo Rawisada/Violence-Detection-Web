@@ -3,7 +3,7 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { FC, useState } from 'react';
 import Image from 'next/image';
-import { Checkbox, FormControlLabel, TextField } from "@mui/material";
+import { Checkbox, FormControlLabel, TextField, Typography } from "@mui/material";
 
 const Signup: FC = () => {
   const { data: session } = useSession();
@@ -36,9 +36,27 @@ const Signup: FC = () => {
 
           <div className="text-center mb-6">
             <h1 className="text-3xl font-bold text-black">Create your account</h1>
-            <p className="text-gray-600">
-              Already a member <a href="/" className="text-blue-500">Log in</a>
-            </p>
+            <Typography 
+                variant="h6"  
+                sx={{ 
+                    fontSize: '14px', 
+                    color: 'gray',
+                }}
+              >
+                Already a member {' '}
+                <Typography 
+                    component="a" 
+                    href="/"
+                    sx={{
+                        color: '#03A9F4',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                        '&:hover': { textDecoration: 'underline' }
+                    }}
+                >
+                    Sign in
+                </Typography>
+              </Typography>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 flex flex-col items-center">
@@ -99,24 +117,55 @@ const Signup: FC = () => {
                 />
             </div>
 
-            <FormControlLabel sx={{ color: "black", width: "100%", margin: 0, marginTop: 0}}
-                control={
-                    <Checkbox 
-                    checked={agreeTerms}
-                    onChange={(e) => setAgreeTerms(e.target.checked)}
-                    sx={{ color: "gray", "&.Mui-checked": { color: "black" } }} />
-                }
-                label="I accept the Terms and Conditions"
+            <FormControlLabel
+              sx={{
+                  color: "black",
+                  width: "100%",
+                  margin: 0,
+                  padding: 0, 
+                  alignItems: "flex-start", 
+              }}
+              control={
+                  <Checkbox
+                      checked={agreeTerms}
+                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      sx={{
+                          color: "gray",
+                          "&.Mui-checked": { color: "black" },
+                          padding: 0,
+                          marginRight:1
+                      }}
+                  />
+              }
+              label={
+                  <Typography variant="body1" component="span" sx={{ color: "black" }}>
+                      I accept the{" "}
+                      <Typography
+                          component="span"
+                          sx={{ color: "#03A9F4", cursor: "pointer" }}
+                      >
+                          Terms
+                      </Typography>{" "}
+                      and{" "}
+                      <Typography
+                          component="span"
+                          sx={{ color: "#03A9F4", cursor: "pointer" }}
+                      >
+                          Conditions
+                      </Typography>
+                  </Typography>
+              }
             />
+
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+              className="w-full bg-[#03A9F4] text-white py-2 rounded-[4px] hover:bg-[#01579B]"
             >
               GET STARTED
             </button>
           </form>
 
-          <div className="flex items-center my-6">
+          <div className="flex items-center my-3">
             <hr className="flex-grow border-gray-300" />
             <span className="px-3 text-gray-500">Or</span>
             <hr className="flex-grow border-gray-300" />
@@ -124,7 +173,7 @@ const Signup: FC = () => {
 
           <button
             onClick={() => signIn('google')} 
-            className="w-full flex items-center justify-center border py-2 rounded-lg hover:bg-gray-100 text-black"
+            className="w-full flex items-center justify-center border py-2 rounded-[4px] hover:bg-gray-100 text-black"
           >
             <Image
               src="/google_logo.png" 
