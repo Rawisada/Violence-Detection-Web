@@ -7,75 +7,160 @@ import useViolenceData from "@/app/hook/useDataLiveFeed";
 import { Button } from "@mui/material";
 import { VIOLENCE_TYPES } from "@/constants/violenceType";
 import { formatDate } from "@/lib/formate";
+import useDataCamera from "../hook/useDataCamera";
+import { uploadVideo } from "@/utils/uploadVideo";
+import { FFmpeg } from '@ffmpeg/ffmpeg'
 const LiveFeedComponent: React.FC = () => {
-
+  const ffmpeg = new FFmpeg();
   const { data, loading, error } = useViolenceData();
-  const [currentDateTime, setCurrentDateTime] = useState<string>("");
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [cameraActive, setCameraActive] = useState<boolean>(true);
+  const { fetchCameraStatus, updateCameraStatus } = useDataCamera()
   const streamRef = useRef<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const [cameraActive, setCameraActive] = useState<boolean>(true);
+  const [currentDateTime, setCurrentDateTime] = useState<string>("");
+  const cameraId = 1; 
 
   useEffect(() => {
     const updateDateTime = () => {
-      const now = new Date();
-      const formattedDateTime = now.toLocaleString("en-GB", {
-        timeZone: "Asia/Bangkok",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      }).replace(",", "");
-      setCurrentDateTime(formattedDateTime);
+        const now = new Date();
+        const formattedDateTime = now.toLocaleString("en-GB", {
+            timeZone: "Asia/Bangkok",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+        }).replace(",", "");
+        setCurrentDateTime(formattedDateTime);
     };
-
-    updateDateTime();
     const interval = setInterval(updateDateTime, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
-   const startCamera = async () => {
-    try {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-      }
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
+  const loadCameraStatus = async () => {
+    const isActive = await fetchCameraStatus(cameraId);
+    setCameraActive(isActive);
 
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      streamRef.current = stream;
-      
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream; 
-        }
-      }, 100);
-
-      setCameraActive(true);
-    } catch (error) {
-      console.error("Cannot access camera:", error);
+    if (isActive) {
+      await startCamera();
+    } else {
+        stopCamera();
     }
   };
 
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop()); 
-      streamRef.current = null;
+  const startCamera = async () => {
+    try {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+        
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        streamRef.current = stream;
+
+        if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+        } else {
+            console.warn("videoRef ยังไม่พร้อมตอน startCamera");
+        }
+
+        await updateCameraStatus(cameraId, true);
+        setCameraActive(true);
+        startRecording();
+    } catch (error) {
+        console.error("Cannot access camera:", error);
     }
+  };
+
+
+  const stopCamera = async () => {
+    recorderRef.current?.stop();
+    streamRef.current?.getTracks().forEach(track => track.stop());
+    streamRef.current = null;
+
     if (videoRef.current) {
-      videoRef.current.srcObject = null; 
+        videoRef.current.srcObject = null;
     }
+
+    await updateCameraStatus(cameraId, false);
     setCameraActive(false);
   };
 
+  const fixVideoMetadata = async (videoBlob: Blob): Promise<Blob> => {
+    if (!ffmpeg.loaded) await ffmpeg.load();
+
+    const inputFileName = "input.mp4";
+    const outputFileName = "output.mp4";
+
+    const videoData = new Uint8Array(await videoBlob.arrayBuffer());
+
+    await ffmpeg.writeFile(inputFileName, videoData); 
+    await ffmpeg.exec(["-i", inputFileName, "-movflags", "faststart", "-c", "copy", outputFileName]); 
+    
+    const data = await ffmpeg.readFile(outputFileName); 
+    return new Blob([data], { type: "video/mp4" });
+  };
+
+  const startRecording = () => {
+    if (!streamRef.current) {
+        console.error("ไม่มี stream สำหรับอัดวิดีโอ");
+        return;
+    }
+
+    const options = { mimeType: "video/webm; codecs=vp9" }; 
+    const recorder = new MediaRecorder(streamRef.current, options);
+    recorderRef.current = recorder;
+    const chunks: Blob[] = [];
+
+    recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+            chunks.push(e.data);
+        }
+    };
+
+    recorder.onstop = async () => {
+        const videoBlob = new Blob(chunks, { type: "video/webm" });
+        const fixedBlob = await fixVideoMetadata(videoBlob); 
+        await uploadVideo(fixedBlob);
+
+        if (cameraActive) {
+            startRecording();  
+        }
+    };
+
+    recorder.start(1000); 
+    setTimeout(() => {
+        recorder.stop();
+    }, 60 * 1000);
+  };
+
+
   useEffect(() => {
-    startCamera();
+    loadCameraStatus();
   }, []);
+
+  useEffect(() => {
+    const init = async () => {
+        const isActive = await fetchCameraStatus(cameraId);
+        setCameraActive(isActive);
+
+        if (isActive) {
+            await startCamera();
+        } else {
+            await stopCamera();
+        }
+    };
+    init();
+  }, []);
+
+  useEffect(() => {
+      if (cameraActive && streamRef.current && videoRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+      }
+  }, [cameraActive]);
+
 
   return (
     <Box
@@ -164,3 +249,7 @@ const LiveFeedComponent: React.FC = () => {
 };
 
 export default LiveFeedComponent;
+function fixBlobMetadata(videoBlob: Blob) {
+  throw new Error("Function not implemented.");
+}
+

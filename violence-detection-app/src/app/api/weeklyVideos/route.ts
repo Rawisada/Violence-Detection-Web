@@ -28,14 +28,49 @@ export async function POST(req: Request) {
   await dbConnect();
   try {
     const body = await req.json();
+    const { videoName, date, videoPath, camera, fileSize } = body;
     
-    if (!body.videoName || !body.date || !body.videoPath || !body.camera || !body.fileSize) {
+    if (!videoName || !date || !videoPath || camera === undefined || fileSize === undefined) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
-    const newWeeklyVideos = await WeeklyVideos.create(body);
-    return NextResponse.json({ success: true, data: newWeeklyVideos }, { status: 201 });
+    const newVideo = await WeeklyVideos.create({ videoName, date, videoPath, camera, fileSize });
+    return NextResponse.json({ success: true, data: newVideo }, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
+      return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
+  }
+
+}
+
+
+export async function PUT(req: Request) {
+  await dbConnect();
+
+  try {
+    const body = await req.json();
+    const { videoName, date, videoPath, camera, fileSize } = body;
+
+    if (!videoName || !date || !videoPath || camera === undefined || fileSize === undefined) {
+      return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
+    }
+
+    // ค้นหาว่ามีวิดีโออยู่แล้วหรือไม่
+    const existingVideo = await WeeklyVideos.findOne({ videoName });
+
+    if (!existingVideo) {
+      return NextResponse.json({ success: false, error: "Video not found" }, { status: 404 });
+    }
+
+    
+    const updatedVideo = await WeeklyVideos.findOneAndUpdate(
+      { videoName },
+      { date, videoPath, camera, fileSize },
+      { new: true } 
+    );
+
+    return NextResponse.json({ success: true, data: updatedVideo }, { status: 200 });
+
+  } catch (error) {
+    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
   }
 }

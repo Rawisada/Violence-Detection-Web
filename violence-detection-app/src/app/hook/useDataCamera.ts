@@ -7,24 +7,50 @@ const useDataCamera = () => {
   const [data, setData] = useState<CameraData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+ 
+  const fetchCameras = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:3000/api/camera`);
+      const sortedData = response.data?.data?.sort((a: CameraData, b: CameraData) => a.camera - b.camera);
+      setData(sortedData);
+      setError(null);
+    } catch (error) {
+      setError("Failed to fetch camera data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const fetchCameraStatus = async (cameraId: number) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/camera?camera=${cameraId}`);
+      if (response.data.success && response.data.data.length > 0) {
+        return response.data.data[0].status as boolean;
+      }
+      return false; // ถ้าหาไม่เจอหรือมีปัญหา ให้ถือว่าเป็นปิดไว้ก่อน
+    } catch (error) {
+      console.error("Failed to fetch camera status:", error);
+      return false; // กัน error ด้วยการคืน false
+    }
+  };
+
+  // อัปเดตสถานะกล้อง
+  const updateCameraStatus = async (camera: number, status: boolean) => {
+    try {
+      await axios.put(`/api/camera/${camera}`, { status });
+      await fetchCameras();
+    } catch (error) {
+      console.error("Failed to update camera status:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const responseCamera = await axios.get(`http://localhost:3000/api/camera`);
-        const sortedData = responseCamera.data?.data?.sort((a: CameraData, b: CameraData) => a.camera - b.camera);
-
-        setData(sortedData);
-        setError("Failed to fetch data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchCameras(); // โหลดกล้องทั้งหมดตอนแรก
   }, []);
 
-  return { data, loading, error };
+  return { data, loading, error, fetchCameras, fetchCameraStatus, updateCameraStatus };
 };
 
 export default useDataCamera;
