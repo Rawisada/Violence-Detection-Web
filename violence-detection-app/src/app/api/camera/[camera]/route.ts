@@ -31,4 +31,22 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ came
     }
 }
 
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ camera: number }> }) {
+    await dbConnect();
+
+    try {
+        const { camera } = await params;
+        const deletedCamera = await Camera.findOneAndDelete({ camera: Number(camera) });
+
+        if (!deletedCamera) {
+            return NextResponse.json({ success: false, error: "Camera not found" }, { status: 404 });
+        }
+
+        return NextResponse.json({ success: true, message: "Camera deleted successfully" });
+    } catch (error) {
+        return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
+    }
+}
+
+
 

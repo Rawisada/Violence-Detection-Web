@@ -28,9 +28,9 @@ export default function videoStorageViolence() {
 
   if (!session && waiting) {
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#fafafa'}}>
-            <CircularProgress />
-        </Box>
+      <div className="flex justify-center items-center h-screen bg-gray-100">
+        <CircularProgress />
+      </div>
     );
   }
   

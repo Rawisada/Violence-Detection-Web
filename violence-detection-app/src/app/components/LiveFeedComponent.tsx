@@ -9,15 +9,15 @@ import { VIOLENCE_TYPES } from "@/constants/violenceType";
 import { formatDate } from "@/lib/formate";
 import useDataCamera from "../hook/useDataCamera";
 import { uploadVideo } from "@/utils/uploadVideo";
-import { FFmpeg } from '@ffmpeg/ffmpeg'
+import { useCameraContext } from "../context/CameraContext";
 const LiveFeedComponent: React.FC = () => {
-  const ffmpeg = new FFmpeg();
   const { data, loading, error } = useViolenceData();
   const { fetchCameraStatus, updateCameraStatus } = useDataCamera()
   const streamRef = useRef<MediaStream | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  // const videoRef = useRef<HTMLVideoElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
-  const [cameraActive, setCameraActive] = useState<boolean>(true);
+  const { cameraActive, toggleCamera , videoRef} = useCameraContext();
+  // const [cameraActive, setCameraActive] = useState<boolean>(true);
   const [currentDateTime, setCurrentDateTime] = useState<string>("");
   const cameraId = 1; 
 
@@ -39,127 +39,146 @@ const LiveFeedComponent: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const loadCameraStatus = async () => {
-    const isActive = await fetchCameraStatus(cameraId);
-    setCameraActive(isActive);
+  // const loadCameraStatus = async () => {
+  //   const isActive = await fetchCameraStatus(cameraId);
+  //   setCameraActive(isActive);
 
-    if (isActive) {
-      await startCamera();
-    } else {
-        stopCamera();
-    }
-  };
+  //   if (isActive) {
+  //     await startCamera();
+  //   } else {
+  //       stopCamera();
+  //   }
+  // };
 
-  const startCamera = async () => {
-    try {
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
-            streamRef.current = null;
-        }
+  // const startCamera = async () => {
+  //   try {
+  //       if (streamRef.current) {
+  //           streamRef.current.getTracks().forEach(track => track.stop());
+  //           streamRef.current = null;
+  //       }
         
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        streamRef.current = stream;
+  //       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  //       streamRef.current = stream;
 
-        if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-        } else {
-            console.warn("videoRef ยังไม่พร้อมตอน startCamera");
-        }
+  //       if (videoRef.current) {
+  //           videoRef.current.srcObject = stream;
+  //       } else {
+  //           console.warn("videoRef ยังไม่พร้อมตอน startCamera");
+  //       }
 
-        await updateCameraStatus(cameraId, true);
-        setCameraActive(true);
-        startRecording();
-    } catch (error) {
-        console.error("Cannot access camera:", error);
-    }
-  };
+  //       await updateCameraStatus(cameraId, true);
+  //       setCameraActive(true);
+  //       startRecording();
+  //   } catch (error) {
+  //       console.error("Cannot access camera:", error);
+  //   }
+  // };
 
 
-  const stopCamera = async () => {
-    recorderRef.current?.stop();
-    streamRef.current?.getTracks().forEach(track => track.stop());
-    streamRef.current = null;
+  // const stopCamera = async () => {
+  //   recorderRef.current?.stop();
+  //   streamRef.current?.getTracks().forEach(track => track.stop());
+  //   streamRef.current = null;
 
-    if (videoRef.current) {
-        videoRef.current.srcObject = null;
-    }
+  //   if (videoRef.current) {
+  //       videoRef.current.srcObject = null;
+  //   }
 
-    await updateCameraStatus(cameraId, false);
-    setCameraActive(false);
-  };
+  //   await updateCameraStatus(cameraId, false);
+  //   setCameraActive(false);
+  // };
 
-  const fixVideoMetadata = async (videoBlob: Blob): Promise<Blob> => {
-    if (!ffmpeg.loaded) await ffmpeg.load();
+  // const fixVideoMetadata = async (videoBlob: Blob): Promise<Blob> => {
+  //   if (!ffmpeg.loaded) await ffmpeg.load();
 
-    const inputFileName = "input.mp4";
-    const outputFileName = "output.mp4";
+  //   const inputFileName = "input.mp4";
+  //   const outputFileName = "output.mp4";
 
-    const videoData = new Uint8Array(await videoBlob.arrayBuffer());
+  //   const videoData = new Uint8Array(await videoBlob.arrayBuffer());
 
-    await ffmpeg.writeFile(inputFileName, videoData); 
-    await ffmpeg.exec(["-i", inputFileName, "-movflags", "faststart", "-c", "copy", outputFileName]); 
+  //   await ffmpeg.writeFile(inputFileName, videoData); 
+  //   await ffmpeg.exec(["-i", inputFileName, "-movflags", "faststart", "-c", "copy", outputFileName]); 
     
-    const data = await ffmpeg.readFile(outputFileName); 
-    return new Blob([data], { type: "video/mp4" });
-  };
+  //   const data = await ffmpeg.readFile(outputFileName); 
+  //   return new Blob([data], { type: "video/mp4" });
+  // };
 
-  const startRecording = () => {
-    if (!streamRef.current) {
-        console.error("ไม่มี stream สำหรับอัดวิดีโอ");
-        return;
-    }
+  // const startRecording = () => {
+  //   if (!streamRef.current) {
+  //       console.error("ไม่มี stream สำหรับอัดวิดีโอ");
+  //       return;
+  //   }
 
-    const options = { mimeType: "video/webm; codecs=vp9" }; 
-    const recorder = new MediaRecorder(streamRef.current, options);
-    recorderRef.current = recorder;
-    const chunks: Blob[] = [];
+  //   const options = { mimeType: "video/webm; codecs=vp9" }; 
+  //   const recorder = new MediaRecorder(streamRef.current, options);
+  //   recorderRef.current = recorder;
+  //   const chunks: Blob[] = [];
 
-    recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-            chunks.push(e.data);
-        }
-    };
+  //   recorder.ondataavailable = (e) => {
+  //       if (e.data.size > 0) {
+  //           chunks.push(e.data);
+  //       }
+  //   };
 
-    recorder.onstop = async () => {
-        const videoBlob = new Blob(chunks, { type: "video/webm" });
-        const fixedBlob = await fixVideoMetadata(videoBlob); 
-        await uploadVideo(fixedBlob);
+  //   recorder.onstop = async () => {
+  //       const videoBlob = new Blob(chunks, { type: "video/webm" });
+  //       const fixedBlob = await fixVideoMetadata(videoBlob); 
+  //       await uploadVideo(fixedBlob);
 
-        if (cameraActive) {
-            startRecording();  
-        }
-    };
+  //       if (cameraActive) {
+  //           startRecording();  
+  //       }
+  //   };
 
-    recorder.start(1000); 
-    setTimeout(() => {
-        recorder.stop();
-    }, 60 * 1000);
-  };
+  //   recorder.start(1000); 
+  //   setTimeout(() => {
+  //       recorder.stop();
+  //   }, 60 * 1000);
+  // };
 
 
-  useEffect(() => {
-    loadCameraStatus();
-  }, []);
+  // useEffect(() => {
+  //   loadCameraStatus();
+  // }, []);
 
-  useEffect(() => {
-    const init = async () => {
-        const isActive = await fetchCameraStatus(cameraId);
-        setCameraActive(isActive);
+  // useEffect(() => {
+  //   const init = async () => {
+  //       const isActive = await fetchCameraStatus(cameraId);
+  //       setCameraActive(isActive);
 
-        if (isActive) {
-            await startCamera();
-        } else {
-            await stopCamera();
-        }
-    };
-    init();
-  }, []);
+  //       if (isActive) {
+  //           await startCamera();
+  //       } else {
+  //           await stopCamera();
+  //       }
+  //   };
+  //   init();
+  // }, []);
 
-  useEffect(() => {
-      if (cameraActive && streamRef.current && videoRef.current) {
-          videoRef.current.srcObject = streamRef.current;
-      }
-  }, [cameraActive]);
+  // useEffect(() => {
+  //     if (cameraActive && streamRef.current && videoRef.current) {
+  //         videoRef.current.srcObject = streamRef.current;
+  //     }
+  // }, [cameraActive]);
+
+  // useEffect(() => {
+  //     const init = async () => {
+  //         if (!videoRef.current) {
+  //             console.warn("❌ videoRef ยังไม่พร้อม ต้องรอให้ mount ก่อน");
+  //             return;
+  //         }
+  
+  //         const isActive = await fetchCameraStatus(cameraId);
+  //         // setCameraActive(isActive);
+  //         if (isActive) {
+  //             await startCamera();
+  //         } else {
+  //             await stopCamera();
+  //         }
+  //     };
+  
+  //     init();
+  // }, []);
 
 
   return (
@@ -185,12 +204,25 @@ const LiveFeedComponent: React.FC = () => {
           }}
         >
           {cameraActive ? (
-            <video ref={videoRef} autoPlay playsInline style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius:16, padding: 10}} />
+            ""
           ) : (
             <Typography variant="subtitle1" sx={{ color: "#000000" }}>
               Camera is not available
             </Typography>
           )}
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            style={{ 
+              width: "100%", 
+              height: "100%", 
+              objectFit: "cover", 
+              borderRadius: 16, 
+              padding: 10,
+              display: cameraActive ? "block" : "none" 
+            }} 
+          />
         </Box>
         <Box sx={{ textAlign: "center", p: 1, position: "absolute", m:2, display: "flex", right:0, fontSize: 12}}>
           <Typography variant="body2"  sx={{ color: "#ffffff"}}>{currentDateTime}</Typography>
@@ -201,7 +233,7 @@ const LiveFeedComponent: React.FC = () => {
         <Button
           variant="contained"
           color={cameraActive ? "error" : "primary"}
-          onClick={cameraActive ? stopCamera : startCamera}
+          onClick={toggleCamera}
           sx={{
             position: "absolute",
             bottom: "100px",

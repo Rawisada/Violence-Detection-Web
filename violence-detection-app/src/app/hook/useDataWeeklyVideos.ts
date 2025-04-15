@@ -1,45 +1,43 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { WeeklyViodeosData, FilterWeeklyViodeos } from "../types/WeeklyVideosTypes";
 import { getCurrentDate } from "@/constants/todayDate";
+import moment from "moment"; 
 
 const useDataWeeklyVideos = (filter?: FilterWeeklyViodeos) => {
   const [data, setData] = useState<WeeklyViodeosData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const todayDate = getCurrentDate();
-  const fetchFilteredData = async (filters: FilterWeeklyViodeos) => {
+  // const pastDate = moment().subtract(6, "days").format("YYYY-MM-DD");
+
+  const fetchFilteredData = useCallback(async (filters: FilterWeeklyViodeos) => {
     setLoading(true);
     try {
       const queryParams = new URLSearchParams();
-
-      if (filters.camera.length > 0) {
+      if (filters.camera?.length) {
         queryParams.append("camera", filters.camera.join(","));
       }
       if (filters.date) {
         queryParams.append("date", filters.date);
       }
-
-      const response = await axios.get(`http://localhost:3000/api/weeklyVideos?${queryParams.toString()}`);
-      setData(response.data.data); 
-      setError(null); 
+      const response = await axios.get(`/api/weeklyVideos?${queryParams.toString()}`);
+      setData(response.data.data);
+      setError(null);
     } catch (error) {
       console.error("Fetch Error:", error);
       setError("Failed to fetch data.");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    if (filter) {
-      fetchFilteredData(filter);
-    } else {
-      fetchFilteredData({ camera: [], date: todayDate});
-    }
-  }, [filter]);
+    fetchFilteredData(filter || { camera: [], date: todayDate });
+  }, [filter, fetchFilteredData]);
 
-  return { data, loading, error, refetch: fetchFilteredData }
+  return { data, loading, error, refetch: fetchFilteredData };
 };
 
 export default useDataWeeklyVideos;

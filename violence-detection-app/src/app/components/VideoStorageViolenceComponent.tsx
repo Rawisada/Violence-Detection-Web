@@ -25,7 +25,7 @@ const columns: GridColDef<ViolenceData>[] = [
     field: "camera",
     headerName: "Camera No.",
     width: 150,
-    valueGetter: (value, row) => `Camera No. ${row?.camera}`
+    valueGetter: (value, row) => `CAM No. ${row?.camera}`
   },
   {
     field: "date",

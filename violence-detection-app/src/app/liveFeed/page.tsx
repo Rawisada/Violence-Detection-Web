@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {useEffect, useState} from 'react';
 import { Box, CircularProgress } from "@mui/material";
 import LiveFeedComponent from "../components/LiveFeedComponent";
-
+import { CameraProvider } from "../context/CameraContext";
 export default function LiveFeedPage() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -42,7 +42,9 @@ export default function LiveFeedPage() {
     <div className="bg-[#fafafa]">
       <TabsComponent session={session} />
       <div className="mx-[104px]">
-        <LiveFeedComponent/>
+        <CameraProvider>
+          <LiveFeedComponent />
+        </CameraProvider>
       </div>
     </div>
   );

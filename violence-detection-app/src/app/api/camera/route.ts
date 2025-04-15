@@ -6,14 +6,18 @@ import Camera from "@/models/Camera";
 export async function GET(req: Request) {
   await dbConnect();
   const { searchParams } = new URL(req.url);
-  const date = searchParams.get("camera"); 
+  const camera = searchParams.get("camera"); 
 
   try {
     let data;
-    if (date) {
-      data = await Camera.find({ date }).sort({ createdAt: -1 });
+    if (camera) {
+      data = await Camera.find({ camera }).sort({ createdAt: -1 });
     } else {
       data = await Camera.find().sort({ createdAt: -1 });
+    }
+
+    if (!data.length) {
+      return NextResponse.json({ success: true, data: [], message: "Video not found" });
     }
     return NextResponse.json({ success: true, data });
   } catch (error) {

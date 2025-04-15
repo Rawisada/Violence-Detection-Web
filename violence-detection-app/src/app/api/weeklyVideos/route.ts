@@ -3,19 +3,48 @@ import dbConnect from "@/lib/mongodb";
 import WeeklyVideos from "@/models/WeeklyVideos";
 
 
+// export async function GET(req: Request) {
+//   await dbConnect();
+//   const { searchParams } = new URL(req.url);
+//   const date = searchParams.get("date");
+//   const camera = searchParams.get("camera")?.split(",");
+
+//   try {
+//     let filter: any = {};
+
+//     if (date) filter.date = date;
+//     if (camera) filter.camera = camera;
+
+//     const data = await WeeklyVideos.find(filter).sort({ createdAt: -1 });
+
+//     return NextResponse.json({ success: true, data });
+//   } catch (error) {
+//     return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
+//   }
+// }
+
 export async function GET(req: Request) {
   await dbConnect();
   const { searchParams } = new URL(req.url);
+  const videoName = searchParams.get("videoName");
   const date = searchParams.get("date");
   const camera = searchParams.get("camera")?.split(",");
 
   try {
     let filter: any = {};
 
-    if (date) filter.date = date;
-    if (camera) filter.camera = camera;
+    if (videoName) {
+      filter.videoName = videoName;
+    } else {
+      if (date) filter.date = date;
+      if (camera) filter.camera = { $in: camera };
+    }
 
     const data = await WeeklyVideos.find(filter).sort({ createdAt: -1 });
+
+    if (!data.length) {
+      return NextResponse.json({ success: true, data: [], message: "Video not found" });
+    }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
@@ -42,7 +71,7 @@ export async function POST(req: Request) {
 
 }
 
-
+// PUT: เพิ่มข้อมูลใหม่
 export async function PUT(req: Request) {
   await dbConnect();
 
@@ -54,7 +83,6 @@ export async function PUT(req: Request) {
       return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 });
     }
 
-    // ค้นหาว่ามีวิดีโออยู่แล้วหรือไม่
     const existingVideo = await WeeklyVideos.findOne({ videoName });
 
     if (!existingVideo) {

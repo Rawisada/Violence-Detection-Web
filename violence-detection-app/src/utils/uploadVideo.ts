@@ -4,18 +4,39 @@ export const uploadVideo = async (videoBlob: Blob) => {
     // const now = new Date().toLocaleTimeString("en-GB", { hour12: false }).replace(/:/g, "-");
     // const videoName = `video_${today}_${now}`;
     const videoName = `video_${today}`;
-    const videoPath = `/videos/${videoName}.mp4`;
+    const videoPath = `/weeklyVideos/${videoName}.mp4`;
 
     const formData = new FormData();
-    formData.append("video", videoBlob, `${videoName}.mp4`);
+    formData.append("videoName", `${videoName}.mp4`);
 
-    const uploadResponse = await fetch("/api/uploadFile", {
-        method: "POST",
-        body: formData,
-    });
+    const checkFileResponse = await fetch(`/api/checkFile?videoName=${videoName}`);
+    const fileExists = await checkFileResponse.json();
+    console.log(fileExists.exists);
 
-    if (!uploadResponse.ok) {
-        throw new Error("Upload failed");
+    if (fileExists.exists) {
+        formData.append("video", videoBlob, `${videoName}_new.mp4`);
+        
+        const mergeResponse = await fetch("/api/mergeVideos", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!mergeResponse.ok) {
+            throw new Error("การรวมวิดีโอล้มเหลว");
+        }
+
+    } else {
+        console.log("ไม่มีไฟล์เดิม อัปโหลดไฟล์ใหม่...");
+        formData.append("video", videoBlob, `${videoName}.mp4`);
+        
+        const uploadResponse = await fetch("/api/uploadFile", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+            throw new Error("Upload failed");
+        }
     }
 
     const fileSizeInMB = (videoBlob.size / (1024 * 1024)).toFixed(2);
@@ -28,9 +49,7 @@ export const uploadVideo = async (videoBlob: Blob) => {
         fileSize: Number(fileSizeInMB),
     };
 
-    const checkResponse = await fetch(`/api/weeklyVideos?videoName=${metaData.videoName}`);
-    const existingVideo = await checkResponse.json();
-    const method = existingVideo ? "PUT" : "POST";
+    const method = fileExists.exists ? "PUT" : "POST";
 
     const saveResponse = await fetch("/api/weeklyVideos", {
         method: method,

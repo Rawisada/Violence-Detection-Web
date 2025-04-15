@@ -29,14 +29,14 @@ const useDataCamera = () => {
       if (response.data.success && response.data.data.length > 0) {
         return response.data.data[0].status as boolean;
       }
-      return false; // ถ้าหาไม่เจอหรือมีปัญหา ให้ถือว่าเป็นปิดไว้ก่อน
+      return false; 
     } catch (error) {
       console.error("Failed to fetch camera status:", error);
-      return false; // กัน error ด้วยการคืน false
+      return false; 
     }
   };
 
-  // อัปเดตสถานะกล้อง
+  
   const updateCameraStatus = async (camera: number, status: boolean) => {
     try {
       await axios.put(`/api/camera/${camera}`, { status });
@@ -46,11 +46,20 @@ const useDataCamera = () => {
     }
   };
 
+  const deleteCamera = async (camera: number) => {
+    try {
+      await axios.delete(`/api/camera/${camera}`);
+      setData((prevData) => prevData.filter((cam) => cam.camera !== camera));
+    } catch (error) {
+      console.error("Failed to delete camera:", error);
+    }
+  };
+
   useEffect(() => {
-    fetchCameras(); // โหลดกล้องทั้งหมดตอนแรก
+    fetchCameras(); 
   }, []);
 
-  return { data, loading, error, fetchCameras, fetchCameraStatus, updateCameraStatus };
+  return { data, loading, error, fetchCameras, fetchCameraStatus, updateCameraStatus, deleteCamera };
 };
 
 export default useDataCamera;

@@ -1,15 +1,14 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import dbConnect from "@/lib/mongodb"; // Import a utility to connect to the DB
-import User from "@/models/User"; // Assuming you place your user model in `models/User`
+import dbConnect from "@/lib/mongodb"; 
+import User from "@/models/User"; 
 import { MongoClient } from "mongodb";
 import { Session} from "next-auth";
 
-// Extend Session and User types
 declare module "next-auth" {
   interface Session {
     user: {
-      id: string; // Adding custom user ID to the session
+      id: string; 
       name: string;
       email: string;
       image?: string;
@@ -37,12 +36,16 @@ export const authOptions: AuthOptions = {
       try {
         await dbConnect();
 
-        // Check if user already exists in the databas
         const existingUser = await User.findOne({ email: user.email });
-        const nameParts = user.name.split(" "); // แยกด้วยช่องว่าง
-        const firstName = nameParts[0]; // ชื่อแรกสุด
-        const lastName = nameParts.slice(1).join(" "); // รวมคำที่เหลือเป็น lastName
-        // If the user doesn't exist, create a new user
+        const nameParts = user.name.split(" "); 
+        const firstName = nameParts[0]; 
+        const lastName = nameParts.slice(1).join(" ");
+        const personalDomains = ["gmail.com", "hotmail.com", "yahoo.com", "outlook.com", "icloud.com"]
+        const domain = user.email.split('@')[1] || "";
+        const isPersonal = personalDomains.includes(domain.toLowerCase());
+        const organization = isPersonal ? "personal" : domain.split('.')[0];
+      
+
         if (!existingUser) {
           const newUser = new User({
             email: user.email,
@@ -50,13 +53,14 @@ export const authOptions: AuthOptions = {
               firstName: firstName,
               lastName: lastName,
               image: user.image,
+              role: 'user',
+              organization: organization,
             },
           });
 
-          // Save the new user
           await newUser.save();
         }
-        return true; // Allow the sign-in to proceed
+        return true; 
       } catch (error) {
         console.error("Error in sign-in callback:", error);
         return false;

@@ -5,6 +5,7 @@ interface IProfile {
   firstName: string;
   lastName?: string;
   image?: string;
+  organization?: string;
 }
 
 interface IUser extends Document {
@@ -32,6 +33,14 @@ const userSchema = new Schema<IUser>(
         trim: true,
       },
       image: {
+        type: String,
+        trim: true,
+      },
+      role: {
+        type: String,
+        trim: true,
+      },
+      organization: {
         type: String,
         trim: true,
       },

@@ -34,7 +34,7 @@ export default function TabsComponent({ session }: TabProps) {
 
   const getValueFromPathname = (path: string) => {
     if (path === '/liveFeed') return 'one';
-    if (path ==='/videoStorageWeekly'  || path === '/videoStorageViolence') return 'two';
+    if (path ==='/videoStorageWeekly'  || path === '/videoStorageViolence' || path === '/videoDetailWeekly') return 'two';
     if (path === '/summary') return 'three';
     if (path === '/systemSetting') return 'four';
     return 'one';
@@ -81,7 +81,6 @@ export default function TabsComponent({ session }: TabProps) {
             flexGrow: 1, 
           }}>
           <Tab value="one" component={Link} href="/liveFeed" label="Live Feed"  />
-          {/* <Tab value="two" component={Link} href="/videoStorage" label="Video Storage" /> */}
           <Tab
             value="two"
             label={
@@ -96,7 +95,7 @@ export default function TabsComponent({ session }: TabProps) {
 
           />
           <Tab value="three" label="Summary" />
-          <Tab value="four" label="System Setting"  />
+          <Tab value="four" label="System Setting" component={Link} href="/systemSetting" />
         </Tabs>
 
         <Menu
