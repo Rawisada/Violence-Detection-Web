@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { Box, Typography, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, TextField, InputAdornment } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -9,12 +9,14 @@ import useDataUser from "../hook/useDataUser";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { useRouter } from "next/navigation";
 import AddUserDialogComponenet from "./AddUserDialogComponenet";
+import SearchIcon from '@mui/icons-material/Search';
 
 const AdministrationComponent: React.FC = () => {
   const router = useRouter();
   const { data, loading, error, fetchAllUsers, deleteUser, updateUser } = useDataUser();
   const [open, setOpen] = useState(false);
   const [clientReady, setClientReady] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); 
 
   useEffect(() => {
       if(data){
@@ -57,14 +59,6 @@ const AdministrationComponent: React.FC = () => {
               event.preventDefault();
               setSelectedUserId(params.row._id);
               setConfirmOpenUpdate(true);
-              // const currentRole = params.row.profile.role;
-              // const newRole = currentRole === "admin" ? "user" : "admin";
-              // updateUser(params.row._id, {
-              //   profile: {
-              //     ...params.row.profile,
-              //     role: newRole,
-              //   },
-              // });
             }}
             sx={{ fontSize: "0.75rem", padding: "2px 8px", minWidth: "unset" }}
           >
@@ -126,43 +120,71 @@ const AdministrationComponent: React.FC = () => {
     setConfirmOpenUpdate(false);
   };
 
-
+  const filteredData = data?.filter((user) => {
+    const fullName = `${user.profile.firstName} ${user.profile.lastName}`.toLowerCase();
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      fullName.includes(searchLower) 
+    );
+  }) || [];
   
-
   return (
     <>
     <Box sx={{ p: 3, minHeight: "92.8vh", backgroundColor: "#fafafa" }}>
-        <Button onClick={() => router.back()} sx={{ p:0, m:0 }}>
-          <Typography variant="h5" sx={{ color: 'black', fontWeight: 'medium' }}>
-          <ChevronLeftIcon sx={{ fontSize: 40}} /> Administration Menu
-          </Typography>
-        </Button>
+      <Button onClick={() => router.back()} sx={{
+        mb: 1,
+        justifyContent: "flex-start",
+        textTransform: "none",
+        '&:hover': {
+          backgroundColor: 'transparent',
+        },
+        left: "-15px",
+      }}>
+        <ChevronLeftIcon/>Back
+      </Button>
 
-        <Typography variant="h6" sx={{ color: 'black', fontWeight: 'medium' }}>
-            User Management
+      <Typography variant="h5" sx={{ color: 'black', fontWeight: 'medium'}}>
+         Administration Menu
         </Typography>
 
-        <Box className="flex justify-end pt-1">
-            <Button variant="contained" onClick={() => setOpen(true)} >
-                <AddIcon /> ADD USER
-            </Button>
-        </Box>
-        <AddUserDialogComponenet open={open} handleClose={() => setOpen(false)} refreshUsers={fetchAllUsers} />
-        {clientReady && ( 
-        <div className="min-h-full min-w-full my-4 ">
-            <DataGrid
-            rows={data}
-            columns={columns}
-            getRowId={(row) => row._id}
-            pageSizeOptions={[5, 10, 20]}
-            loading={loading}
-            sx={{
-                "& .MuiDataGrid-cell": { justifyContent: "center", textAlign: "center" },
-                "& .MuiDataGrid-columnHeaderTitle": { textAlign: "center" },
-            }}
-            />
-        </div>
-      )} 
+      <Typography variant="h6" sx={{ color: 'black', fontWeight: 'medium'}}>
+          User Management
+      </Typography>
+
+
+      <Box className="flex justify-end pt-1">
+          <Button variant="contained" onClick={() => setOpen(true)} >
+              <AddIcon /> ADD USER
+          </Button>
+      </Box>
+
+      <Box className="flex justify-end pt-1 ">
+        <TextField
+          label="Search by Name"
+          variant="standard"
+          size="small"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ width: "250px" }}
+
+        />
+      </Box>
+      <AddUserDialogComponenet open={open} handleClose={() => setOpen(false)} refreshUsers={fetchAllUsers} />
+      {clientReady && ( 
+      <div className="min-h-full min-w-full my-4 ">
+          <DataGrid
+          rows={filteredData}
+          columns={columns}
+          getRowId={(row) => row._id}
+          pageSizeOptions={[5, 10, 20]}
+          loading={loading}
+          sx={{
+              "& .MuiDataGrid-cell": { justifyContent: "center", textAlign: "center" },
+              "& .MuiDataGrid-columnHeaderTitle": { textAlign: "center" },
+          }}
+          />
+      </div>
+    )} 
     </Box>
     {/* Dialog Confirm Delete */}
     <Dialog open={confirmOpenDelete} onClose={handleCancelConfirmDelete} fullWidth maxWidth="xs">

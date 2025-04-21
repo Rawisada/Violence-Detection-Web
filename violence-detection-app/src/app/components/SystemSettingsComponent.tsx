@@ -208,7 +208,7 @@ const SystemSettingsComponent: React.FC<TabProps> = ({ session }) => {
             </Button>
         </Box>
 
-        <AddCameraDialogComponent open={open} handleClose={() => setOpen(false)} refreshCameras={fetchCameras} />
+        <AddCameraDialogComponent open={open} handleClose={() => setOpen(false)} refreshCameras={fetchCameras}  cameras={data}/>
         {clientReady && ( 
         <div className="min-h-full min-w-full my-4 ">
             <DataGrid

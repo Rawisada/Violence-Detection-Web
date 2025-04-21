@@ -140,6 +140,8 @@ const FilterDialogViolenceComponent: React.FC<FilterDialogProps> = ({ open, onCl
               <DatePicker
                 value={filter.date ? dayjs(filter.date) : null}
                 onChange={handleDateChange}
+                maxDate={dayjs()}
+                minDate={dayjs().subtract(6, 'day')}
                 slotProps={{ textField: { fullWidth: true } }}
               />
             </LocalizationProvider>

@@ -47,25 +47,30 @@ const AddUserDialogComponent: React.FC<AddUserDialogProps> = ({ open, handleClos
       }
   };
     
-    const [confirmOpen, setConfirmOpen] = useState(false);
-    const handleAddClick = () => {
-      setConfirmOpen(true);
-    };
-  
-    const handleConfirmAdd = () => {
-      handleSubmit(onSubmit)();
-      setConfirmOpen(false);
-    };
-  
-    const handleCancelConfirm = () => {
-      setConfirmOpen(false);
-      
-    };
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const handleAddClick = () => {
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmAdd = () => {
+    handleSubmit(onSubmit)();
+    setConfirmOpen(false);
+  };
+
+  const handleCancelConfirm = () => {
+    setConfirmOpen(false);
     
+  };
+
+  const handleCloseAndReset = () => {
+    reset();
+    handleClose();
+  };
+  
 
   return (
     <>
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleCloseAndReset} fullWidth maxWidth="sm">
       <DialogTitle>
         <Typography variant="h6" component="span">Add User</Typography>
       </DialogTitle>
@@ -136,7 +141,7 @@ const AddUserDialogComponent: React.FC<AddUserDialogProps> = ({ open, handleClos
         </Box>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={handleClose} color="error">Cancel</Button>
+        <Button onClick={handleCloseAndReset} color="error">Cancel</Button>
         <Button type="submit" onClick={handleAddClick} variant="contained" color="primary" disabled={!isValid}>
           Add
         </Button>
