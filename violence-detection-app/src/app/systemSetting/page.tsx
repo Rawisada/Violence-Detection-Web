@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import {useEffect, useState} from 'react';
 import { Box, CircularProgress } from "@mui/material";
 import SystemSettingsComponent from "../components/SystemSettingsComponent";
-import { CameraProvider } from "../context/CameraContext";
 
 export default function systemSetting() {
   const { data: session } = useSession();
@@ -43,7 +42,7 @@ export default function systemSetting() {
     <div className="bg-[#fafafa] min-h-full">
       <TabsComponent session={session} />
       <div className="mx-[104px]"> 
-          <SystemSettingsComponent/>
+          <SystemSettingsComponent session={session}/>
       </div>
     </div>
   );

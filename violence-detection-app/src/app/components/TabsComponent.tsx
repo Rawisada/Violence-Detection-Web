@@ -36,7 +36,7 @@ export default function TabsComponent({ session }: TabProps) {
     if (path === '/liveFeed') return 'one';
     if (path ==='/videoStorageWeekly'  || path === '/videoStorageViolence' || path === '/videoDetailWeekly') return 'two';
     if (path === '/summary') return 'three';
-    if (path === '/systemSetting') return 'four';
+    if (path === '/systemSetting'|| path === '/administration') return 'four';
     return 'one';
   };
 
@@ -64,17 +64,16 @@ export default function TabsComponent({ session }: TabProps) {
         borderBottom: 1,
         borderColor: "divider",
         alignItems: "center",
-        paddingLeft: 5,
+        paddingLeft: 2,
         paddingRight: 5
         }}
       >
-        <div className="bg-gray-900 rounded-full p-1 flex items-center justify-center w-8 h-8 mr-5">
+        <div className="p-1 flex items-center justify-center max-w-10 max-h-10 mr-5">
           <Image
-            src="/logo.png"
+            src="/logo2.png"
             alt="Camera Icon"
-            width={20}
-            height={20}
-            className="rounded-full"
+            width={100}
+            height={100}
           />
         </div>
         <Tabs value={value} onChange={handleChange} aria-label="basic tabs example" sx={{
@@ -94,7 +93,7 @@ export default function TabsComponent({ session }: TabProps) {
             aria-expanded={open ? 'true' : undefined}
 
           />
-          <Tab value="three" label="Summary" />
+          <Tab value="three" label="Summary" component={Link} href="/summary"/>
           <Tab value="four" label="System Setting" component={Link} href="/systemSetting" />
         </Tabs>
 

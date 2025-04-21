@@ -1,17 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Button, IconButton } from "@mui/material";
+import { Box, Typography, Button, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import VideocamIcon from "@mui/icons-material/Videocam";
-import VideocamOffIcon from "@mui/icons-material/VideocamOff";
-import AddCameraDialogComponent from "./AddCameraDialogCompomnent"; 
-import { useCameraContext } from "../context/CameraContext";
-import useDataCamera from "../hook/useDataCamera";
+import EditIcon from '@mui/icons-material/Edit';
+import useDataUser from "../hook/useDataUser";
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import { useRouter } from "next/navigation";
+import AddUserDialogComponenet from "./AddUserDialogComponenet";
 
 const AdministrationComponent: React.FC = () => {
-  const { data, loading, error, fetchCameras, deleteCamera } = useDataCamera();
+  const router = useRouter();
+  const { data, loading, error, fetchAllUsers, deleteUser, updateUser } = useDataUser();
   const [open, setOpen] = useState(false);
   const [clientReady, setClientReady] = useState(false);
 
@@ -24,24 +25,119 @@ const AdministrationComponent: React.FC = () => {
 
   const columns: GridColDef[] = [
     {
-        field: "camera",
+        field: "fullName",
         headerName: "Full Name",
         width: 200,
-        valueGetter: (value, row) => `CAM No. ${row?.camera}`
+        valueGetter: (value, row) => `${row?.profile.firstName} ${row?.profile.lastName}`
     },
     { field: "email", headerName: "IP Email Address", width: 200 },
-    { field: "date", headerName: "Joined Date", width: 200 },
-    { field: "role", headerName: "Permission", width: 200 },
-    { field: "action", headerName: "Action", width: 200 },
-   
+    {
+      field: "organization",
+      headerName: "Organization",
+      width: 200,
+      valueGetter: (value, row) => `${row?.profile.organization}`
+    },
+    {
+      field: "role",
+      headerName: "Permission",
+      width: 200,
+      valueGetter: (value, row) => `${row?.profile.role}`
+    },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 300,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", gap: 1 , alignItems: "center", justifyContent: "center", height: "100%", width: "100%",}}>
+          <Button
+            size="small"
+            variant="outlined"
+            color="primary"
+            onClick={(event) => {
+              event.preventDefault();
+              setSelectedUserId(params.row._id);
+              setConfirmOpenUpdate(true);
+              // const currentRole = params.row.profile.role;
+              // const newRole = currentRole === "admin" ? "user" : "admin";
+              // updateUser(params.row._id, {
+              //   profile: {
+              //     ...params.row.profile,
+              //     role: newRole,
+              //   },
+              // });
+            }}
+            sx={{ fontSize: "0.75rem", padding: "2px 8px", minWidth: "unset" }}
+          >
+            <EditIcon sx={{marginRight: 0.5, width: 20}}/>  MODIFY
+          </Button>
+    
+          <Button
+            size="small"
+            variant="outlined"
+            color="error"
+            onClick={() => handleDeleteClick(params.row._id)}
+            sx={{ fontSize: "0.75rem", padding: "2px 8px", minWidth: "unset" }}
+          >
+             <DeleteIcon sx={{marginRight: 0.5, width: 20}}/>  REMOVE
+          </Button>
+        </Box>
+      ),
+    }
   ];
 
+  const [confirmOpenDelete, setConfirmOpenDelete] = useState(false);
+  const [confirmOpenUpdate, setConfirmOpenUpdate] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
+  
+  const handleDeleteClick = (userId: string) => {
+    setSelectedUserId(userId);
+    setConfirmOpenDelete(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedUserId) {
+      deleteUser(selectedUserId);
+      setConfirmOpenDelete(false);
+    }
+  };
+
+  const handleCancelConfirmDelete = () => {
+    setConfirmOpenDelete(false);
+  };
+
+  const handleConfirmUpdate = () => {
+    if (selectedUserId) {
+      const user = data.find((u) => String(u._id) === selectedUserId);
+      if (user) {
+        const currentRole = user.profile.role;
+        const newRole = currentRole === "admin" ? "user" : "admin";
+        updateUser(selectedUserId, {
+          profile: {
+            ...user.profile,
+            role: newRole,
+          },
+        });
+      }
+      setConfirmOpenUpdate(false);
+    }
+  };
+
+  const handleCancelConfirmUpdate = () => {
+    setConfirmOpenUpdate(false);
+  };
+
+
+  
+
   return (
+    <>
     <Box sx={{ p: 3, minHeight: "92.8vh", backgroundColor: "#fafafa" }}>
-      
-        <Typography variant="h5" sx={{ color: 'black', fontWeight: 'medium' }}>
-            Administration Menu
-        </Typography>
+        <Button onClick={() => router.back()} sx={{ p:0, m:0 }}>
+          <Typography variant="h5" sx={{ color: 'black', fontWeight: 'medium' }}>
+          <ChevronLeftIcon sx={{ fontSize: 40}} /> Administration Menu
+          </Typography>
+        </Button>
+
         <Typography variant="h6" sx={{ color: 'black', fontWeight: 'medium' }}>
             User Management
         </Typography>
@@ -51,8 +147,7 @@ const AdministrationComponent: React.FC = () => {
                 <AddIcon /> ADD USER
             </Button>
         </Box>
-
-        <AddCameraDialogComponent open={open} handleClose={() => setOpen(false)} refreshCameras={fetchCameras} />
+        <AddUserDialogComponenet open={open} handleClose={() => setOpen(false)} refreshUsers={fetchAllUsers} />
         {clientReady && ( 
         <div className="min-h-full min-w-full my-4 ">
             <DataGrid
@@ -69,6 +164,36 @@ const AdministrationComponent: React.FC = () => {
         </div>
       )} 
     </Box>
+    {/* Dialog Confirm Delete */}
+    <Dialog open={confirmOpenDelete} onClose={handleCancelConfirmDelete} fullWidth maxWidth="xs">
+      <DialogTitle>Delete User</DialogTitle>
+      <DialogContent>
+        <Typography sx={{ mt: 1 }}>
+          Do you want to remove this user?
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCancelConfirmDelete} color="inherit">Cancel</Button>
+        <Button onClick={handleConfirmDelete} variant="contained" color="error">Delete</Button>
+      </DialogActions>
+    </Dialog>
+
+    {/* Dialog Confirm Update Role */}
+    <Dialog open={confirmOpenUpdate} onClose={handleCancelConfirmUpdate} fullWidth maxWidth="xs">
+      <DialogTitle>Update Role</DialogTitle>
+      <DialogContent>
+        <Typography sx={{ mt: 1 }}>
+          Do you want to update role?
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCancelConfirmUpdate} color="inherit">Cancel</Button>
+        <Button onClick={handleConfirmUpdate} variant="contained" sx={{ backgroundColor: '#03A9F4' }}>
+          Update
+        </Button>
+      </DialogActions>
+    </Dialog>
+  </>
   );
 };
 

@@ -2,8 +2,15 @@ import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import dbConnect from "@/lib/mongodb"; 
 import User from "@/models/User"; 
-import { MongoClient } from "mongodb";
+import Alert from '@mui/material/Alert';
 import { Session} from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import crypto from 'crypto';
+
+export function validatePassword(password: string, hash: string, salt: string): boolean {
+  const hashVerify = crypto.pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`);
+  return hash === hashVerify;
+}
 
 declare module "next-auth" {
   interface Session {
@@ -29,6 +36,38 @@ export const authOptions: AuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        await dbConnect();
+      
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Missing email or password");
+        }
+      
+        const user = await User.findOne({ email: credentials.email });
+        if (!user || !user.hash || !user.salt) {
+          throw new Error("Email or Password is incorrect.");
+        }
+      
+        const isValid = validatePassword(credentials.password, user.hash, user.salt);
+        if (!isValid) {
+          throw new Error("Email or Password is incorrect.");
+        }
+      
+        return {
+          id: user._id.toString(),
+          name: `${user.profile.firstName} ${user.profile.lastName}`,
+          email: user.email,
+          image: user.profile.image || null,
+        };
+      }
+      
+    })
   ],
   secret: process.env.NEXTAUTH_SECRET!,
   callbacks: {
@@ -70,13 +109,13 @@ export const authOptions: AuthOptions = {
       await dbConnect();
       const userInDb = await User.findOne({ email: session.user.email });
       if (userInDb) {
-        session.user.id = userInDb.id; // เพิ่ม ID ของ User
+        session.user.id = userInDb.id; 
       }
       return session;
     },
   },
   pages: {
-    error: "/auth/error", // Optional: custom error page for unauthorized access
+    error: "/auth/error", 
   },
 };
 

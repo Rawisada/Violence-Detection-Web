@@ -3,7 +3,7 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { FC, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { TextField, Typography } from "@mui/material";
+import { Alert, Button, TextField } from "@mui/material";
 import { useRouter } from 'next/navigation';
 import { Box, CircularProgress } from "@mui/material";
 
@@ -11,19 +11,31 @@ const HomePage: FC = () => {
   const { data: session } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [waiting, setWaiting] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    alert(`Email: ${email}\nPassword: ${password}`);
-  };
 
   useEffect(() => {
     if (session) {
       router.push('/liveFeed'); 
     }
   }, [session, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    const result = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    });
+  
+    if (result?.error) {
+      setErrorMessage(result.error); 
+    } else if (result?.ok) {
+      router.push("/liveFeed");
+    }
+  };
+  
 
   return (
     <div>
@@ -47,68 +59,64 @@ const HomePage: FC = () => {
 
 
             <div className="text-center mb-6">
-              <h1 className="text-3xl font-bold text-black">Welcome back</h1>
-              <Typography 
-                variant="h6"  
-                sx={{ 
-                    fontSize: '14px', 
-                    color: 'gray',
-                }}
-              >
-                Don’t have an account?{' '}
-                <Typography 
-                    component="a" 
-                    href="/signup"
-                    sx={{
-                        color: '#03A9F4',
-                        textDecoration: 'none',
-                        cursor: 'pointer',
-                        '&:hover': { textDecoration: 'underline' }
-                    }}
-                >
-                    Sign up
-                </Typography>
-              </Typography>
+              <h1 className="text-3xl font-bold text-black">Welcome</h1>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-              <TextField
-                label="Email address"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="john@gmail.com"
-                required
-                fullWidth
-                margin="normal"
-                slotProps={{
-                  inputLabel: { required: false }, 
-                }}
-              />
+                <TextField
+                  label="Email address"
+                  type="email"
+                  
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="john@gmail.com"
+                  required
+                  fullWidth
+                  margin="normal"
+                  slotProps={{
+                    inputLabel: { required: false }, 
+                  }}
+               
+                />
               </div>
-
               <div>
-              <TextField
-                label="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="********"
-                required
-                fullWidth
-                slotProps={{
-                  inputLabel: { required: false }, 
-                }}
-              />
+                <TextField
+                  label="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="********"
+                  required
+                  fullWidth
+                  slotProps={{
+                    inputLabel: { required: false }, 
+                  }}
+                  
+                />
               </div>
-
-              <button
+              {errorMessage && (
+                <Alert  variant="filled"  severity="error" style={{ marginBottom: '10px' }}>
+                  {errorMessage}
+                </Alert>
+              )}
+    
+              <Button
+                variant="contained"
                 type="submit"
-                className="w-full bg-[#03A9F4] text-white py-2 rounded-[4px] hover:bg-[#01579B]"
+                fullWidth
+                sx={{
+                  py: 1.5,
+                  borderRadius: '4px',
+                  backgroundColor: '#03A9F4',
+                  '&:hover': {
+                    backgroundColor: '#01579B',
+                  },
+                }}
+                disabled={!email || !password}
               >
                 SIGN IN
-              </button>
+              </Button>
             </form>
 
             <div className="flex items-center my-3">
@@ -117,19 +125,32 @@ const HomePage: FC = () => {
               <hr className="flex-grow border-gray-300" />
             </div>
 
-            <button
-              onClick={() => signIn('google')} 
-              className="w-full flex items-center justify-center border py-2 rounded-[4px] hover:bg-gray-100 text-black"
-            >
-              <Image
-                src="/google_logo.png" 
-                alt="Google Icon"
-                width={20}
-                height={20}
-                className="mr-2"
-              />
-              SIGN IN WITH GOOGLE
-            </button>
+            <Button
+                variant="text"
+                onClick={() => signIn('google')} 
+                fullWidth
+                sx={{
+                  py: 1.5,
+                  borderRadius: '4px',
+                  backgroundColor: '#fffff',
+                  color: 'black',
+                  boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                  '&:hover': {
+                    backgroundColor: '#fffff',
+                    boxShadow: '0px 6px 8px rgba(0, 0, 0, 0.15)', 
+                  },
+                }}
+              >
+                <Image
+                  src="/google_logo.png" 
+                  alt="Google Icon"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />
+                SIGN IN WITH GOOGLE
+            </Button>
+
           </div>
         </div>
       )}

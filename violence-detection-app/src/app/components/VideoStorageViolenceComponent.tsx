@@ -72,7 +72,6 @@ const columns: GridColDef<ViolenceData>[] = [
   },
 ];
 
-
 const VideoStorageViolenceComponent: React.FC = () => {
   const { data, loading ,error, refetch} = useDataViolenceVideos();
   const [filteredData, setFilteredData] = useState<ViolenceData[]>([])
@@ -131,7 +130,6 @@ const VideoStorageViolenceComponent: React.FC = () => {
 
       {clientReady && ( 
         <div className="min-h-full min-w-full my-4 ">
-          
           <DataGrid
             rows={filteredData}
             columns={columns.map((column) => ({

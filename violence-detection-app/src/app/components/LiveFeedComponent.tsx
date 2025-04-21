@@ -14,10 +14,8 @@ const LiveFeedComponent: React.FC = () => {
   const { data, loading, error } = useViolenceData();
   const { fetchCameraStatus, updateCameraStatus } = useDataCamera()
   const streamRef = useRef<MediaStream | null>(null);
-  // const videoRef = useRef<HTMLVideoElement>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const { cameraActive, toggleCamera , videoRef} = useCameraContext();
-  // const [cameraActive, setCameraActive] = useState<boolean>(true);
   const [currentDateTime, setCurrentDateTime] = useState<string>("");
   const cameraId = 1; 
 

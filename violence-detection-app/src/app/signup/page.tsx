@@ -1,9 +1,10 @@
 "use client";
 
 import { signIn, signOut, useSession } from 'next-auth/react';
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Checkbox, FormControlLabel, TextField, Typography } from "@mui/material";
+import useSignup from '../hook/useSignUp';
 
 const Signup: FC = () => {
   const { data: session } = useSession();
@@ -12,11 +13,38 @@ const Signup: FC = () => {
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const { loading, error, success, signup } = useSignup();
+
+  useEffect(() => {
+    if (success) {
+      setEmail('');
+      setPassword('');
+      setFirstName('');
+      setLastName('');
+      setAgreeTerms(false);
+    }
+  }, [success]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Email: ${email}\nPassword: ${password}`);
+    if (!agreeTerms) {
+      alert("Please accept the terms and conditions");
+      return;
+    }
+  
+    await signup({
+      email,
+      password,
+      firstName: firstname,
+      lastName: lastname,
+    });
   };
+
+  {success && (
+    <Typography color="primary" className="text-center mt-2">
+      Signup successful! You can now log in.
+    </Typography>
+  )}
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-[url('/bg-pattern.jpg')] bg-cover bg-center">

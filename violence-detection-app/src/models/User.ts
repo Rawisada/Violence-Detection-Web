@@ -5,6 +5,7 @@ interface IProfile {
   firstName: string;
   lastName?: string;
   image?: string;
+  role?: string;
   organization?: string;
 }
 
@@ -22,6 +23,16 @@ const userSchema = new Schema<IUser>(
       trim: true,
       unique: true,
       required: true,
+    },
+    hash: {
+      type: String,
+      trim: true,
+      required: false,
+    },
+    salt: {
+      type: String,
+      trim: true,
+      required: false,
     },
     profile: {
       firstName: {

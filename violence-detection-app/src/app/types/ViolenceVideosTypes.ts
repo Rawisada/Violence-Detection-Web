@@ -1,4 +1,5 @@
 export interface ViolenceData {
+    createdAt(createdAt: any): unknown;
     _id: number;
     videoName: string;
     type: number; 

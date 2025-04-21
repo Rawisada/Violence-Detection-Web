@@ -3,10 +3,10 @@ import TabsComponent from "@/app/components/TabsComponent";
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {useEffect, useState} from 'react';
-import { Box, CircularProgress } from "@mui/material";
-import AdministrationComponent from "../components/AdministrationComponent";
+import { CircularProgress } from "@mui/material";
+import DashboardComponent from "../components/DashboardComponent";
 
-export default function administration() {
+export default function summary() {
   const { data: session } = useSession();
   const router = useRouter();
   const [waiting, setWaiting] = useState(true);
@@ -42,7 +42,7 @@ export default function administration() {
     <div className="bg-[#fafafa] min-h-full">
       <TabsComponent session={session} />
       <div className="mx-[104px]"> 
-        <AdministrationComponent/>
+        <DashboardComponent/>
       </div>
     </div>
   );
