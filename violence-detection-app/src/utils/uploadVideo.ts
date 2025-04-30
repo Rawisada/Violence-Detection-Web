@@ -1,8 +1,6 @@
 import { getCurrentDate } from "@/constants/todayDate";
 export const uploadVideo = async (videoBlob: Blob) => {
     const today = getCurrentDate()
-    // const now = new Date().toLocaleTimeString("en-GB", { hour12: false }).replace(/:/g, "-");
-    // const videoName = `video_${today}_${now}`;
     const videoName = `video_${today}`;
     const videoPath = `/weeklyVideos/${videoName}.mp4`;
 

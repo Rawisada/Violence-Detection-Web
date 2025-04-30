@@ -14,16 +14,12 @@ export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const { fetchCameraStatus, updateCameraStatus } = useDataCamera();
   const [cameraActive, setCameraActive] = useState<boolean>(false);
-  // const streamRef = useRef<MediaStream | null>(null);
   const streamRef = useRef<MediaStream | null>(
     (typeof window !== "undefined" && (window as any).cameraStream) || null
   );
   const recorderRef = useRef<MediaRecorder | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null!);
   const cameraId = 1; 
-
-
-  
 
   useEffect(() => {
     const init = async () => {
@@ -33,22 +29,16 @@ export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
 
       const isActive = await fetchCameraStatus(cameraId);
-      // if (isActive) {
-      //     await startCamera();
-      // } else {
-      //     await stopCamera();
-      // }
       if (typeof window !== "undefined" && (window as any).cameraStream) {
-        console.log("✅ กล้องเปิดอยู่แล้ว, ไม่ต้องเปิดใหม่");
+        console.log("กล้องเปิดอยู่แล้ว, ไม่ต้องเปิดใหม่");
         streamRef.current = (window as any).cameraStream;
         videoRef.current!.srcObject = streamRef.current;
         setCameraActive(true);
       } else if (isActive) {
-        console.log("📹 เปิดกล้อง...");
+        console.log("เปิดกล้อง");
         await startCamera();
       } else {
-        console.log("📴 ไม่เปิดกล้องอัตโนมัติ");
-        // await stopCamera();
+        console.log("ไม่เปิดกล้องอัตโนมัติ");
       }
 
     };
@@ -83,7 +73,7 @@ export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const stopCamera = async (forceClose: boolean = false) => {
     if (!forceClose) {
-      console.warn("⚠️ ไม่ปิดกล้อง เพราะต้องเปิดตลอด");
+      console.warn("ไม่ปิดกล้อง เพราะต้องเปิดตลอด");
       return;
     }
 
@@ -162,13 +152,13 @@ export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
 
   const toggleCamera = async () => {
-    console.log("📌 Toggle Camera Clicked | ก่อนเปลี่ยนค่า cameraActive:", cameraActive);
+    console.log("Toggle Camera Clicked | ก่อนเปลี่ยนค่า cameraActive:", cameraActive);
 
     if (cameraActive) {
-      console.log("📴 ปิดกล้อง...");
+      console.log("ปิดกล้อง");
       await stopCamera(true)
     } else {
-      console.log("📹 เปิดกล้อง...");
+      console.log("เปิดกล้อง");
       await startCamera();
     }
   };
@@ -181,7 +171,7 @@ export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         playsInline
         muted
         style={{
-          display: "none", // ซ่อนวิดีโอ ไม่ให้แสดงบน UI
+          display: "none", 
           position: "absolute",
           top: "-9999px",
           left: "-9999px",
