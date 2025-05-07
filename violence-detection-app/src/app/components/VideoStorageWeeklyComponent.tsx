@@ -10,55 +10,55 @@ import { getCurrentDate } from "@/constants/todayDate";
 import useDataWeeklyVideos from "../hook/useDataWeeklyVideos";
 import { useRouter } from "next/navigation";
 
-const VideoThumbnail = ({ videoPath }: { videoPath: string }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [thumbnail, setThumbnail] = useState<string | null>(null);
+// const VideoThumbnail = ({ videoPath }: { videoPath: string }) => {
+//   const videoRef = useRef<HTMLVideoElement>(null);
+//   const canvasRef = useRef<HTMLCanvasElement>(null);
+//   const [thumbnail, setThumbnail] = useState<string | null>(null);
   
-  useEffect(() => {
-    const captureFrame = () => {
-      if (videoRef.current && canvasRef.current) {
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
+//   useEffect(() => {
+//     const captureFrame = () => {
+//       if (videoRef.current && canvasRef.current) {
+//         const video = videoRef.current;
+//         const canvas = canvasRef.current;
+//         const ctx = canvas.getContext("2d");
 
-        video.currentTime = 1; // ไปที่วินาทีที่ 1
-        video.onseeked = () => {
-          if (ctx) {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            setThumbnail(canvas.toDataURL("image/png")); // แปลงเป็น Base64
-          }
-        };
-      }
-    };
+//         video.currentTime = 1; // ไปที่วินาทีที่ 1
+//         video.onseeked = () => {
+//           if (ctx) {
+//             canvas.width = video.videoWidth;
+//             canvas.height = video.videoHeight;
+//             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+//             setThumbnail(canvas.toDataURL("image/png")); // แปลงเป็น Base64
+//           }
+//         };
+//       }
+//     };
 
-    if (videoRef.current) {
-      videoRef.current.addEventListener("loadedmetadata", captureFrame);
-    }
+//     if (videoRef.current) {
+//       videoRef.current.addEventListener("loadedmetadata", captureFrame);
+//     }
 
-    return () => {
-      if (videoRef.current) {
-        videoRef.current.removeEventListener("loadedmetadata", captureFrame);
-      }
-    };
-  }, [videoPath]); // ✅ ใช้ videoPath เป็น dependency
+//     return () => {
+//       if (videoRef.current) {
+//         videoRef.current.removeEventListener("loadedmetadata", captureFrame);
+//       }
+//     };
+//   }, [videoPath]);
 
-  return (
-    <div className="flex items-center justify-center">
-      {thumbnail ? (
-        <img src={thumbnail} alt="Thumbnail" className="w-[140px] h-[80px] rounded-[8px] my-[16px]" />
-      ) : (
-        <>
-          <video ref={videoRef} src={videoPath} style={{ display: "none" }} />
-          <canvas ref={canvasRef} style={{ display: "none" }} />
-          <Box className="w-[140px] h-[80px] bg-gray-300 rounded-[8px] my-[16px]"></Box>
-        </>
-      )}
-    </div>
-  );
-};
+//   return (
+//     <div className="flex items-center justify-center">
+//       {thumbnail ? (
+//         <img src={thumbnail} alt="Thumbnail" className="w-[140px] h-[80px] rounded-[8px] my-[16px]" />
+//       ) : (
+//         <>
+//           <video ref={videoRef} src={videoPath} style={{ display: "none" }} />
+//           <canvas ref={canvasRef} style={{ display: "none" }} />
+//           <Box className="w-[140px] h-[80px] bg-gray-300 rounded-[8px] my-[16px]"></Box>
+//         </>
+//       )}
+//     </div>
+//   );
+// };
 
 
 const columns: GridColDef<WeeklyViodeosData>[] = [
@@ -66,36 +66,52 @@ const columns: GridColDef<WeeklyViodeosData>[] = [
     field: "video",
     headerName: "Video",
     width: 250,
-    // renderCell: () => (
-    //   <div className="flex items-center justify-center">
-    //      <Box className="w-[140px] h-[80px] bg-gray-300 rounded-[8px] my-[16px]"></Box>
-    //   </div>
-    // ),
-    renderCell: (params) => (
-      <VideoThumbnail videoPath={`/weeklyVideos/${params.row.videoName}`} />
-    ),
+    disableColumnMenu: true,
+    renderCell: (params) => {
+      const videoSrc = params.row.videoPath;
+      return (
+        <div className="flex items-center justify-center w-full">
+          <video
+            src={videoSrc}
+            className="w-[140px] h-[80px] object-cover rounded-[8px] my-[16px]"
+            muted
+            playsInline
+            preload="metadata"
+            onLoadedMetadata={(e) => {
+              const video = e.currentTarget;
+              video.currentTime = 0.1; 
+            }}
+          />
+        </div>
+      );
+    }
   },
   {
     field: "camera",
     headerName: "Camera No.",
-    width: 220,
-    valueGetter: (value, row) => `Camera No. ${row?.camera}`
+    width: 200,
+    disableColumnMenu: true,
+    valueGetter: (value, row) => `CAM ${row?.camera}`
   },
   {
     field: "date",
     headerName: "Date",
-    width: 220,
+    width: 200,
+    disableColumnMenu: true,
     valueGetter: (value, row) => formatDate(row?.date), 
   },
   { field: "fileSize", 
-    headerName: "fileSize",
-    width: 220,
+    headerName: "File Size",
+    width: 200,
+    disableColumnMenu: true,
     valueGetter: (value, row) => formatFileSize(row?.fileSize), 
   },  
   {
     field: "action",
-    headerName: "Action",
+    headerName: "",
     width: 120,
+    sortable: false,
+    disableColumnMenu: true,
     renderCell: (params) => {
       const router = useRouter();
       return (
@@ -107,6 +123,11 @@ const columns: GridColDef<WeeklyViodeosData>[] = [
             alignItems: "center",
             justifyContent: "center",
             borderRadius: 0,
+            p:0,
+            m:0,
+            '&:hover': {
+              backgroundColor: 'transparent',
+            },
           }}
           onClick={() => router.push(`/videoDetailWeekly/${params.row.videoName}`)}
         >
@@ -151,11 +172,11 @@ const VideoStorageWeeklyComponent: React.FC = () => {
 
 
   return (
-    <Box className="py-3"  
+    <Box 
       sx={{
+        p: 3,
         minHeight:"92.8vh",
         backgroundColor: "#fafafa",
-       
       }}
       >
       <Typography variant="h5" sx={{ color: 'black', fontWeight: 'medium' }}>
@@ -179,8 +200,8 @@ const VideoStorageWeeklyComponent: React.FC = () => {
             rows={filteredData}
             columns={columns.map((column) => ({
               ...column,
-              headerAlign: "center", 
-              align: "center", 
+              headerAlign: "left", 
+              align: "left", 
             }))}
             getRowId={(row) => row._id || Math.random()}
             rowHeight={112}
@@ -189,8 +210,8 @@ const VideoStorageWeeklyComponent: React.FC = () => {
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
             sx={{
-              "& .MuiDataGrid-cell": { justifyContent: "center", textAlign: "center"},
-              "& .MuiDataGrid-columnHeaderTitle": { textAlign: "center" }, 
+              "& .MuiDataGrid-cell": { justifyContent: "left", textAlign: "left"},
+              "& .MuiDataGrid-columnHeaderTitle": { textAlign: "left" }, 
               minHeight: "74vh",
             }}
             loading={loading}

@@ -18,12 +18,12 @@ export function getLatestUpdatedAt(data: ViolenceData[]): string {
     if (!data || data.length === 0) return "-";
   
     const latest = data.reduce((a, b) => {
-      const aDate = new Date(`${a.date}T${a.time}`);
-      const bDate = new Date(`${b.date}T${b.time}`);
+      const aDate = new Date(`${a.date}T${a.time.replace(/-/g, ":")}`);
+      const bDate = new Date(`${b.date}T${b.time.replace(/-/g, ":")}`);
       return aDate > bDate ? a : b;
     });
   
-    const datetime = parseISO(`${latest.date}T${latest.time}`);
+    const datetime = parseISO(`${latest.date}T${latest.time.replace(/-/g, ":")}`);
     return format(datetime, "dd/MM/yyyy, HH:mm:ss");
   }
 
@@ -39,11 +39,12 @@ const DashboardComponent: React.FC = () => {
     const colorMapping : Record<number, string> = {
         1: "#1976d2",
         2: "#4fc3f7",
-        3: "#90a4ae",
+        3: "#b3e5fc",
+        4: "#90a4ae",
     };
 
     const totalIncidents = violenceData.length;
-    const incidentsByType = [1, 2, 3].map((typeId) => {
+    const incidentsByType = [1, 2, 3, 4].map((typeId) => {
         const count = violenceData.filter((item) => item.type === typeId).length;
         return {
         id: typeId,
@@ -121,8 +122,9 @@ const DashboardComponent: React.FC = () => {
 
         <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
             <Card   sx={{
-                flex: 1,
+                flex: 2,
                 p: 2,
+                
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",

@@ -1,7 +1,7 @@
 "use client";
 import TabsComponent from "@/app/components/TabsComponent";
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {useEffect, useState, use} from 'react';
 import { Box, CircularProgress } from "@mui/material";
 import DetailViolenceVideosComponent from "@/app/components/DetailViolenceVideosComponent";
@@ -10,6 +10,7 @@ export default function videoDetailViolence({ params }: { params: Promise<{ vide
   const { data: session } = useSession();
   const router = useRouter();
   const [waiting, setWaiting] = useState(true);
+  const pathname = usePathname();
 
   const { videoName } = use(params);
 
@@ -21,7 +22,7 @@ export default function videoDetailViolence({ params }: { params: Promise<{ vide
 
     const timer = setTimeout(() => {
         if (!session) {
-            router.push('/');
+          router.push(`/?callbackUrl=${pathname}`);
         }
     }, 300);
 

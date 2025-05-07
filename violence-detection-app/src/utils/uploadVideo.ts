@@ -1,7 +1,7 @@
 import { getCurrentDate } from "@/constants/todayDate";
 export const uploadVideo = async (videoBlob: Blob) => {
     const today = getCurrentDate()
-    const videoName = `video_${today}`;
+    const videoName = `CAM1_${today}`;
     const videoPath = `/weeklyVideos/${videoName}.mp4`;
 
     const formData = new FormData();

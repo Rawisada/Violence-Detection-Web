@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Button, Box, Typography, Checkbox, FormControlLabel
+  TextField, Button, Box, Typography, Checkbox, FormControlLabel,
+  Alert
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
@@ -28,24 +29,29 @@ const AddUserDialogComponent: React.FC<AddUserDialogProps> = ({ open, handleClos
   });  
 
   const { loading, error, success, signup } = useSignup();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const onSubmit = async (data: any) => {
-      try {
-        await signup({
-          email: data.email,
-          password: data.password,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          organization: data.organization
-        });
+    try {
+      setErrorMessage(null); // เคลียร์ error เดิม
+      await signup({
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        organization: data.organization
+      });
+  
+      refreshUsers();
+      handleClose();
+      reset();
+    } catch (error) {
+      const err = error as Error;
+      setErrorMessage(err.message || "Something went wrong");
+    }
     
-        refreshUsers();
-        handleClose();
-        reset();
-      } catch (error) {
-        console.error("Failed to add user:", error);
-      }
   };
+  
     
   const [confirmOpen, setConfirmOpen] = useState(false);
   const handleAddClick = () => {
@@ -64,6 +70,7 @@ const AddUserDialogComponent: React.FC<AddUserDialogProps> = ({ open, handleClos
 
   const handleCloseAndReset = () => {
     reset();
+    setErrorMessage(null);
     handleClose();
   };
   
@@ -119,7 +126,7 @@ const AddUserDialogComponent: React.FC<AddUserDialogProps> = ({ open, handleClos
             control={control}
             rules={{ required: "organization is required" }}
             render={({ field }) => (
-              <TextField {...field} label="organization" fullWidth required />
+              <TextField {...field} label="Organization" fullWidth required />
             )}
           />
           <Controller
@@ -137,6 +144,14 @@ const AddUserDialogComponent: React.FC<AddUserDialogProps> = ({ open, handleClos
               helperText={error && error.type !== 'required'? error.message : ""} />
             )}
           />
+          {errorMessage && (
+            <Box sx={{ mb: 2 }}>
+              <Alert variant="filled" severity="error">
+                {errorMessage}
+              </Alert>
+            </Box>
+          )}
+
           
         </Box>
       </DialogContent>

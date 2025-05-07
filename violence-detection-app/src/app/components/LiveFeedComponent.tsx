@@ -4,12 +4,13 @@ import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import useViolenceData from "@/app/hook/useDataLiveFeed";
-import { Button } from "@mui/material";
-import { VIOLENCE_TYPES } from "@/constants/violenceType";
-import { formatDate } from "@/lib/formate";
+import { Button, CircularProgress } from "@mui/material";
+import { VIOLENCE_OPTIONS, VIOLENCE_TYPES } from "@/constants/violenceType";
+import { formatDate, formatTime } from "@/lib/formate";
 import useDataCamera from "../hook/useDataCamera";
-import { uploadVideo } from "@/utils/uploadVideo";
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { useCameraContext } from "../context/CameraContext";
+import { useRouter } from "next/navigation";
 const LiveFeedComponent: React.FC = () => {
   const { data, loading, error } = useViolenceData();
   const { fetchCameraStatus, updateCameraStatus } = useDataCamera()
@@ -18,6 +19,7 @@ const LiveFeedComponent: React.FC = () => {
   const { cameraActive, toggleCamera , videoRef} = useCameraContext();
   const [currentDateTime, setCurrentDateTime] = useState<string>("");
   const cameraId = 1; 
+  const router = useRouter();
 
   useEffect(() => {
     const updateDateTime = () => {
@@ -40,6 +42,7 @@ const LiveFeedComponent: React.FC = () => {
   return (
     <Box
       sx={{
+        p: 3,
         display: "flex",
         flexDirection: "row",
         height: "92.8vh",
@@ -48,7 +51,7 @@ const LiveFeedComponent: React.FC = () => {
         m: 0
       }}
     >
-      <Box sx={{ flex: 6, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", padding: "0 !important"}}>
+      <Box sx={{ flex: 6, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", padding: "0 !important", marginY:2}}>
         <Box
           sx={{
             flex: 1,
@@ -75,15 +78,15 @@ const LiveFeedComponent: React.FC = () => {
               height: "100%", 
               objectFit: "cover", 
               borderRadius: 16, 
-              padding: 10,
+              marginRight: 10,
               display: cameraActive ? "block" : "none" 
             }} 
           />
         </Box>
-        <Box sx={{ textAlign: "center", p: 1, position: "absolute", m:2, display: "flex", right:0, fontSize: 12}}>
+        <Box sx={{ textAlign: "center", p: 1, position: "absolute", m:1, mr:3, display: "flex", right:0, fontSize: 12}}>
           <Typography variant="body2"  sx={{ color: "#ffffff"}}>{currentDateTime}</Typography>
         </Box>
-        <Box sx={{ textAlign: "center", p: 1,  position: "absolute", m:2, display: "flex", left:0, fontSize: 12}}>
+        <Box sx={{ textAlign: "center", p: 1,  position: "absolute", m:1, display: "flex", left:0, fontSize: 12}}>
           <Typography variant="body2"  sx={{ color: "#ffff"}}>CAM 01</Typography>
         </Box>
         <Button
@@ -91,11 +94,15 @@ const LiveFeedComponent: React.FC = () => {
           color={cameraActive ? "error" : "primary"}
           onClick={toggleCamera}
           sx={{
-            position: "absolute",
-            bottom: "100px",
-            left: "50%",
-            transform: "translateX(-50%)",
+            // position: "absolute",
+            // bottom: "50px",
+            // left: "50%",
+            // transform: "translateX(-50%)",
+            marginTop:3,
+            maxWidth: 100,
             zIndex: 10,
+            display: "block",
+            mx: "auto",   
           }}
         >
           {cameraActive ? "ปิดกล้อง" : "เปิดกล้อง"}
@@ -103,32 +110,91 @@ const LiveFeedComponent: React.FC = () => {
 
       </Box>
 
-      <Box sx={{ flex: 3, display: "flex", flexDirection: "column", p: 2 , backgroundColor: "#fafafa"}}>
+      <Box sx={{ flex: 3, display: "flex", flexDirection: "column", p: 2 , backgroundColor: "#EEEEEE", borderRadius: 3, marginY:2}}>
         <Typography variant="h6" sx={{ mb: 2, color: "#000000", textAlign: "center"}}>
           Violence Detected
         </Typography>
-        <Box sx={{ flex: 1, overflowY: "auto"}}>
-          {data.map((item, index) => (
-            <Card key={index} sx={{ mb: 1, background:"#ffffff"}}>
+        <Box sx={{
+            flex: 1,
+            overflowY: "auto",
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: '#f0f0f0',
+              borderRadius: '10px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#c0c0c0',
+              borderRadius: '10px',
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              backgroundColor: '#a0a0a0',
+            },
+            scrollbarWidth: 'thin',             
+            scrollbarColor: '#c0c0c0 #f0f0f0', 
+          }}>
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center",  alignItems: "center",  height: "95%", mt: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : data.length === 0 ? (
+            <Typography variant="body1" align="center" color="gray" sx={{ mt: 2 , display: "flex", justifyContent: "center", alignItems: "center",  height: "95%",}}>
+              No detection found
+            </Typography>
+          ) : (data.map((item, index) => (
+            <Card key={index} sx={{ mb: 1, background:"#ffffff", marginRight:1}}>
               <CardContent sx={{ display: "flex", alignItems: "center",  padding: "10px !important"}}>
-                <Box
+              <Box
                   sx={{
                     width: 90,
                     height: 90,
                     backgroundColor: "#fafafa",
                     mr: 2,
-                    borderRadius: "4px"
+                    borderRadius: "4px",
+                    overflow: "hidden"
                   }}
-                ></Box>
+                >
+                  <video
+                    src={item.videoPath}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    onLoadedMetadata={(e) => {
+                      const video = e.currentTarget;
+                      video.currentTime = 0.1;
+                    }}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </Box>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="subtitle1">
-                    Violence: <strong>{VIOLENCE_TYPES[item.type]}</strong>
+                    Type: <strong>{VIOLENCE_TYPES[item.type]}</strong>
                   </Typography>
                   <Typography variant="body2">Date: {formatDate(item.date)}</Typography>
-                  <Typography variant="body2">Time: {item.time}</Typography>
+                  <Typography variant="body2">Time: {formatTime(item.time)}</Typography>
                 </Box>
+
+                <Button
+                  sx={{
+                    minWidth: '30px',          
+                    width: '30px',           
+                    height: '30px', 
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 0, 
+                    '&:hover': {
+                      backgroundColor: 'transparent',
+                    },
+                  }}
+                  onClick={() => router.push(`/videoDetailViolence/${item.videoName}`)}
+                >
+                  <ArrowForwardIosIcon/>
+                </Button>
               </CardContent>
             </Card>
+          )
           ))}
         </Box>
       </Box>

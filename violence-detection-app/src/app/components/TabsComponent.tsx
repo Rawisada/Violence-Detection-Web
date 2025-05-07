@@ -30,6 +30,10 @@ export default function TabsComponent({ session }: TabProps) {
 
   const handleClose = () => {
       setAnchorEl(null);
+
+      if (pathname !== '/videoStorageWeekly' && pathname !== '/videoStorageViolence') {
+        setValue(getValueFromPathname(pathname));
+      }
   };
 
   const getValueFromPathname = (path: string) => {
@@ -65,7 +69,10 @@ export default function TabsComponent({ session }: TabProps) {
         borderColor: "divider",
         alignItems: "center",
         paddingLeft: 2,
-        paddingRight: 5
+        paddingRight: 5,
+        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+        zIndex: 10,
+        position: "sticky" 
         }}
       >
         <div className="p-1 flex items-center justify-center max-w-10 max-h-10 mr-5">

@@ -52,13 +52,15 @@ const SystemSettingsComponent: React.FC<TabProps> = ({ session }) => {
         field: "camera",
         headerName: "Camera No.",
         width: 200,
+        disableColumnMenu: true,
         valueGetter: (value, row) => `CAM No. ${row?.camera}`
     },
-    { field: "ip", headerName: "IP Camera", width: 300 },
+    { field: "ip", headerName: "IP Camera", width: 300, disableColumnMenu: true, },
     {
       field: "status",
       headerName: "Status",
       width: 300,
+      disableColumnMenu: true,
       renderCell: (params) => (
         <Box 
         sx={{
@@ -85,8 +87,10 @@ const SystemSettingsComponent: React.FC<TabProps> = ({ session }) => {
     },
     {
       field: "action",
-      headerName: "Action",
+      headerName: "",
       width: 200,
+      sortable: false,
+      disableColumnMenu: true,
       renderCell: (params) => (
         <Box sx={{  display: "flex", gap: 1 , alignItems: "center", justifyContent: "center", height: "100%", width: "100%", }}>
           <IconButton
@@ -181,10 +185,10 @@ const SystemSettingsComponent: React.FC<TabProps> = ({ session }) => {
             Email: {user?.email}
         </Typography>
         <Typography variant="body1" sx={{ color: 'black', fontWeight: 'medium' }}>
-            Organization: {user?.profile.organization}
+            Organization: <Box component="span" sx={{ textTransform: 'uppercase' }}>{user?.profile.organization}</Box>
         </Typography>
         <Typography variant="body1" sx={{ color: 'black', fontWeight: 'medium' }}>
-            Role: {user?.profile.role}
+            Role: <Box component="span" sx={{ textTransform: 'uppercase' }}>{user?.profile.role}</Box>
         </Typography>
 
         {user?.profile.role == 'admin' && (
@@ -218,8 +222,8 @@ const SystemSettingsComponent: React.FC<TabProps> = ({ session }) => {
             pageSizeOptions={[5, 10, 20]}
             loading={loading}
             sx={{
-                "& .MuiDataGrid-cell": { justifyContent: "center", textAlign: "center" },
-                "& .MuiDataGrid-columnHeaderTitle": { textAlign: "center" },
+                "& .MuiDataGrid-cell": { justifyContent: "left", textAlign: "left" },
+                "& .MuiDataGrid-columnHeaderTitle": { textAlign: "left" },
             }}
             />
         </div>

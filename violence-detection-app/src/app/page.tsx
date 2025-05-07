@@ -4,8 +4,8 @@ import { signIn, signOut, useSession } from 'next-auth/react';
 import { FC, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Alert, Button, TextField } from "@mui/material";
-import { useRouter } from 'next/navigation';
 import { Box, CircularProgress } from "@mui/material";
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const HomePage: FC = () => {
   const { data: session } = useSession();
@@ -13,10 +13,12 @@ const HomePage: FC = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (session) {
-      router.push('/liveFeed'); 
+      const callbackUrl = searchParams.get('callbackUrl') || '/liveFeed';
+      router.push(callbackUrl);
     }
   }, [session, router]);
 

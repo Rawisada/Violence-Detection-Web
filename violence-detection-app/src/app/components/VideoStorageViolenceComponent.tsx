@@ -4,56 +4,83 @@ import { Button, Box, Typography, CircularProgress } from "@mui/material";
 import useDataViolenceVideos from "@/app/hook/useDataViolenceVideos";
 import { VIOLENCE_TYPES } from "@/constants/violenceType";
 import FilterDialogViolenceComponent from "./FilterDialogViolenceComponent"; 
-import { formatDate, formatFileSize } from "@/lib/formate";
+import { formatDate, formatFileSize, formatTime } from "@/lib/formate";
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import { ViolenceData, FilterViolenceVideos } from "../types/ViolenceVideosTypes";
 import { getCurrentDate } from "@/constants/todayDate";
+import { useRouter } from "next/navigation";
+
 
 const columns: GridColDef<ViolenceData>[] = [
   {
     field: "video",
     headerName: "Video",
     width: 200,
-    renderCell: () => (
-      <div className="flex items-center justify-center">
-         <Box className="w-[140px] h-[80px] bg-gray-300 rounded-[8px] my-[16px]"></Box>
-      </div>
-    ),
+    disableColumnMenu: true,
+    renderCell: (params) => {
+      const videoSrc = params.row.videoPath;
+      return (
+        <div className="flex items-center justify-center w-full">
+          <video
+            src={videoSrc}
+            className="w-[140px] h-[80px] object-cover rounded-[8px] my-[16px]"
+            muted
+            playsInline
+            preload="metadata"
+            onLoadedMetadata={(e) => {
+              const video = e.currentTarget;
+              video.currentTime = 0.1; 
+            }}
+          />
+        </div>
+      );
+    }
   },
   {
     field: "camera",
     headerName: "Camera No.",
     width: 150,
-    valueGetter: (value, row) => `CAM No. ${row?.camera}`
+    disableColumnMenu: true,
+    valueGetter: (value, row) => `CAM ${row?.camera}`
   },
   {
     field: "date",
     headerName: "Date",
     width: 150,
+    disableColumnMenu: true,
     valueGetter: (value, row) => formatDate(row?.date), 
   },
   { 
     field: "time", 
     headerName: "Time", 
-    width: 150
+    width: 120,
+    disableColumnMenu: true,
+    valueGetter: (value, row) => formatTime(row?.time),
   },
   {
     field: "type",
-    headerName: "Violence Type",
-    width: 140,
-    valueGetter: (value, row) => (VIOLENCE_TYPES[row?.type]),
+    headerName: "Person",
+    width: 120,
+    disableColumnMenu: true,
+    valueGetter: (value, row) =>
+      VIOLENCE_TYPES[row?.type],
   },
   { 
     field: "fileSize", 
-    headerName: "fileSize", 
-    width: 130, 
+    headerName: "File Size", 
+    width: 120, 
+    disableColumnMenu: true,
     valueGetter: (value, row) => formatFileSize(row?.fileSize), },
   {
     field: "action",
-    headerName: "Action",
+    headerName: "",
     width: 120,
-    renderCell: (params) => (
+    sortable: false,
+    disableColumnMenu: true,
+    renderCell: (params) => {
+      const router = useRouter();
+      return (
       <Button
         sx={{
           width: '100%',
@@ -61,14 +88,18 @@ const columns: GridColDef<ViolenceData>[] = [
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          p:0,
+          m:0,
           borderRadius: 0, 
-
+          '&:hover': {
+            backgroundColor: 'transparent',
+          },
         }}
-        onClick={() => window.open(params.row.videoPath, "_blank")}
+        onClick={() => router.push(`/videoDetailViolence/${params.row.videoName}`)}
       >
         <ArrowForwardIosIcon/>
       </Button>
-    ),
+    )},
   },
 ];
 
@@ -106,8 +137,9 @@ const VideoStorageViolenceComponent: React.FC = () => {
 
 
   return (
-    <Box className="py-3"  
+    <Box 
       sx={{
+        p: 3,
         minHeight:"92.8vh",
         backgroundColor: "#fafafa",
        
@@ -134,8 +166,8 @@ const VideoStorageViolenceComponent: React.FC = () => {
             rows={filteredData}
             columns={columns.map((column) => ({
               ...column,
-              headerAlign: "center", 
-              align: "center", 
+              headerAlign: "left",
+              align: "left",
             }))}
             getRowId={(row) => row._id || Math.random()}
             rowHeight={112}
@@ -144,8 +176,8 @@ const VideoStorageViolenceComponent: React.FC = () => {
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
             sx={{
-              "& .MuiDataGrid-cell": { justifyContent: "center", textAlign: "center"},
-              "& .MuiDataGrid-columnHeaderTitle": { textAlign: "center" }, 
+              "& .MuiDataGrid-cell": { justifyContent: "center", textAlign: "left"},
+              "& .MuiDataGrid-columnHeaderTitle": { textAlign: "left" }, 
               minHeight: "74vh",
             }}
             loading={loading}

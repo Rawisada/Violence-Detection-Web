@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     const existing = await User.findOne({ email });
     if (existing) {
-      return NextResponse.json({ message: "User already exists" }, { status: 400 });
+      return NextResponse.json({ message: "User already exists" }, { status: 409 });
     }
 
     const salt = crypto.randomBytes(16).toString("hex");

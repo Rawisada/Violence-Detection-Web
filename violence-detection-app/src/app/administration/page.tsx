@@ -1,7 +1,7 @@
 "use client";
 import TabsComponent from "@/app/components/TabsComponent";
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {useEffect, useState} from 'react';
 import { Box, CircularProgress } from "@mui/material";
 import AdministrationComponent from "../components/AdministrationComponent";
@@ -10,6 +10,7 @@ export default function administration() {
   const { data: session } = useSession();
   const router = useRouter();
   const [waiting, setWaiting] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (session) {
@@ -19,7 +20,7 @@ export default function administration() {
 
     const timer = setTimeout(() => {
         if (!session) {
-            router.push('/');
+          router.push(`/?callbackUrl=${pathname}`);
         }
     }, 300);
 

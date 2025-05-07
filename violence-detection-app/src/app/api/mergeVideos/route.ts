@@ -32,7 +32,7 @@ export async function POST(req: Request) {
         fs.writeFileSync(tempPath, buffer);
 
         if (!fs.existsSync(videoPath)) {
-            console.warn(`⚠️ ไม่มีไฟล์ต้นฉบับ ${videoPath}, ใช้ไฟล์ใหม่แทน`);
+            console.warn(`ไม่มีไฟล์ต้นฉบับ ${videoPath}, ใช้ไฟล์ใหม่แทน`);
             fs.renameSync(tempPath, videoPath);  
             return NextResponse.json({ success: true, message: "New video saved successfully" });
         }
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 
         const ffmpegPath = path.join(process.cwd(), "node_modules", "ffmpeg-static", "ffmpeg.exe");
         if (!fs.existsSync(ffmpegPath)) {
-            console.error(`❌ ffmpeg-static path does not exist: ${ffmpegPath}`);
+            console.error(`ffmpeg-static path does not exist: ${ffmpegPath}`);
             return NextResponse.json({ success: false, error: "FFmpeg path not found" }, { status: 500 });
         }
 
@@ -52,10 +52,10 @@ export async function POST(req: Request) {
             const command = `"${ffmpegPath}" -f concat -safe 0 -i "${fileListPath}" -movflags faststart -c copy "${mergedPath}"`;
             exec(command, (error, stdout, stderr) => {
                 if (error) {
-                    console.error("❌ ffmpeg error:", stderr);
+                    console.error("ffmpeg error:", stderr);
                     reject(NextResponse.json({ success: false, error: "Failed to merge videos" }, { status: 500 }));
                 } else {
-                    console.log("✅ ffmpeg output:", stdout);
+                    console.log("ffmpeg output:", stdout);
                     resolve(true);
                 }
             });

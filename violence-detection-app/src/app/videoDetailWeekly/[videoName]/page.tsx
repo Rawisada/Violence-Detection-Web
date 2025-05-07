@@ -2,7 +2,7 @@
 import TabsComponent from "@/app/components/TabsComponent";
 import { useSession } from 'next-auth/react';
 import DetailWeeklyVideosComponent from "@/app/components/DetailWeeklyVideosComponent";
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {useEffect, useState, use} from 'react';
 import { Box, CircularProgress } from "@mui/material";
 
@@ -10,6 +10,7 @@ export default function videoDetailWeekly({ params }: { params: Promise<{ videoN
   const { data: session } = useSession();
   const router = useRouter();
   const [waiting, setWaiting] = useState(true);
+  const pathname = usePathname();
 
   const { videoName } = use(params);
 
@@ -21,7 +22,7 @@ export default function videoDetailWeekly({ params }: { params: Promise<{ videoN
 
     const timer = setTimeout(() => {
         if (!session) {
-            router.push('/');
+          router.push(`/?callbackUrl=${pathname}`);
         }
     }, 300);
 

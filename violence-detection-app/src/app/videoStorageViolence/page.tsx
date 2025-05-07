@@ -2,14 +2,16 @@
 import TabsComponent from "@/app/components/TabsComponent";
 import { useSession } from 'next-auth/react';
 import VideoStorageComponent from "../components/VideoStorageViolenceComponent";
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {useEffect, useState} from 'react';
 import { Box, CircularProgress } from "@mui/material";
+
 
 export default function videoStorageViolence() {
   const { data: session } = useSession();
   const router = useRouter();
   const [waiting, setWaiting] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (session) {
@@ -19,7 +21,7 @@ export default function videoStorageViolence() {
 
     const timer = setTimeout(() => {
         if (!session) {
-            router.push('/');
+          router.push(`/?callbackUrl=${pathname}`);
         }
     }, 200);
 

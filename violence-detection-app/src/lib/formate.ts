@@ -11,3 +11,8 @@ export const formatFileSize = (sizeInMB: number): string => {
   }
   return `${sizeInMB} MB`;
 };
+
+
+export const formatTime = (timeString: string): string => {
+  return timeString.replace(/-/g, ":");
+};

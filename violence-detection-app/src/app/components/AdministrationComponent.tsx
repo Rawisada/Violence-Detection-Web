@@ -30,25 +30,30 @@ const AdministrationComponent: React.FC = () => {
         field: "fullName",
         headerName: "Full Name",
         width: 200,
+        disableColumnMenu: true,
         valueGetter: (value, row) => `${row?.profile.firstName} ${row?.profile.lastName}`
     },
-    { field: "email", headerName: "IP Email Address", width: 200 },
+    { field: "email", headerName: "Email Address", width: 200 },
     {
       field: "organization",
       headerName: "Organization",
-      width: 200,
+      width: 150,
+      disableColumnMenu: true,
       valueGetter: (value, row) => `${row?.profile.organization}`
     },
     {
       field: "role",
       headerName: "Permission",
-      width: 200,
+      width: 150,
+      disableColumnMenu: true,
       valueGetter: (value, row) => `${row?.profile.role}`
     },
     {
       field: "action",
-      headerName: "Action",
+      headerName: "",
       width: 300,
+      sortable: false,
+      disableColumnMenu: true,
       renderCell: (params) => (
         <Box sx={{ display: "flex", gap: 1 , alignItems: "center", justifyContent: "center", height: "100%", width: "100%",}}>
           <Button
@@ -179,8 +184,8 @@ const AdministrationComponent: React.FC = () => {
           pageSizeOptions={[5, 10, 20]}
           loading={loading}
           sx={{
-              "& .MuiDataGrid-cell": { justifyContent: "center", textAlign: "center" },
-              "& .MuiDataGrid-columnHeaderTitle": { textAlign: "center" },
+              "& .MuiDataGrid-cell": { justifyContent: "left", textAlign: "left" },
+              "& .MuiDataGrid-columnHeaderTitle": { textAlign: "left" },
           }}
           />
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from "@mui/material";
 import { useRouter } from "next/navigation";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { WeeklyViodeosData } from "../types/WeeklyVideosTypes";
@@ -83,25 +83,25 @@ const DetailWeeklyVideosComponent: React.FC<DetailWeeklyVideosComponentProps> = 
             <>
               <div className="flex justify-between">
                 <div>
-                <Typography variant="body1" sx={{ color: 'black', fontWeight: 'medium' }}>
-                  Camera NO: CAM {video.camera}
-                </Typography>
-                <Typography variant="body1" sx={{ color: 'black', fontWeight: 'medium' }}>
-                  Date: {formatDate(video.date)}
-                </Typography>
-                <Typography variant="body1" sx={{ color: 'black', fontWeight: 'medium' }}>
-                  File Size: {formatFileSize(video.fileSize)}
-                </Typography>
+                  <Typography variant="body1" sx={{ color: 'black', fontWeight: 'medium' }}>
+                    Camera No.: CAM {video.camera}
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: 'black', fontWeight: 'medium' }}>
+                    Date: {formatDate(video.date)}
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: 'black', fontWeight: 'medium' }}>
+                    File Size: {formatFileSize(video.fileSize)}
+                  </Typography>
                 </div>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ my: 2, mr:1}}
-                startIcon={<CloudDownloadIcon />}
-                onClick={handleDownloadClick}
-              >
-                download
-              </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{mr:1, maxHeight: "35px"}}
+                  startIcon={<CloudDownloadIcon />}
+                  onClick={handleDownloadClick}
+                >
+                  download
+                </Button>
               </div>
               <div>
                 <video controls width="full" className="mt-3 rounded-md">
@@ -112,7 +112,9 @@ const DetailWeeklyVideosComponent: React.FC<DetailWeeklyVideosComponentProps> = 
             </>
 
           ) : (
-            <Typography>Loading video...</Typography>
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "200px" }}>
+              <CircularProgress />
+            </Box>
           )}
         </div>
       </Box>

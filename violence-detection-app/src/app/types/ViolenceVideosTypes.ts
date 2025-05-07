@@ -3,6 +3,7 @@ export interface ViolenceData {
     _id: number;
     videoName: string;
     type: number; 
+    person: number[]; 
     date: string;
     time: string;
     videoPath: string;

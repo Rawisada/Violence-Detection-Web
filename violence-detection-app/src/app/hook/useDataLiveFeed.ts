@@ -5,6 +5,7 @@ interface ViolenceData {
   id: number;
   videoName: string;
   type: number; 
+  person: number[]; 
   date: string;
   time: string;
   videoPath: string;
@@ -20,23 +21,23 @@ const useViolenceData = () => {
     const today = new Date();
     return today.toLocaleDateString("en-CA", { timeZone: "Asia/Bangkok" });
   };
+
+  const fetchData = async () => {
+    try {
+      const todayDate = getCurrentDate();
+      const response = await axios.get(`http://localhost:3000/api/violence?date=${todayDate}`); 
+      setData(response.data.data); 
+    } catch (err) {
+      setError("Failed to fetch data.");
+    } finally {
+      setLoading(false);
+    }
+  };
   
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const todayDate = getCurrentDate();
-        const response = await axios.get(`http://localhost:3000/api/violence?date=${todayDate}`); 
-        setData(response.data.data); 
-      } catch (err) {
-        setError("Failed to fetch data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, []);
+  }, [data]);
 
   return { data, loading, error };
 };

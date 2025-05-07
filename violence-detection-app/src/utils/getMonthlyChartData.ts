@@ -14,7 +14,7 @@ export const getMonthlyChartData = (data: ViolenceData[]) => {
   
 
   // แยกตาม type (0, 1, 2)
-  const chartData = [0, 1, 2].map(typeId => {
+  const chartData = [1, 2, 3, 4].map(typeId => {
     return {
       id: typeId,
       label: getLabelByType(typeId),
@@ -29,9 +29,10 @@ export const getMonthlyChartData = (data: ViolenceData[]) => {
 // Helper แปลง typeId เป็นชื่อ
 function getLabelByType(type: number) {
   switch (type) {
-    case 0: return "Child - Adult";
-    case 1: return "Adult - Adult";
-    case 2: return "Child - Child";
+    case 1: return "Critical";
+    case 2: return "High";
+    case 3: return "Medium";
+    case 4: return "Low";
     default: return "Unknown";
   }
 }
@@ -39,9 +40,10 @@ function getLabelByType(type: number) {
 // Helper แปลง typeId เป็นสี
 function getColorByType(type: number) {
   switch (type) {
-    case 0: return "#1976d2";
-    case 1: return "#4fc3f7";
-    case 2: return "#90a4ae";
+    case 1: return "#1976d2";
+    case 2: return "#4fc3f7";
+    case 3: return "#b3e5fc";
+    case 4: return "#90a4ae";
     default: return "#ccc";
   }
 }

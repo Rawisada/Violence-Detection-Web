@@ -12,9 +12,11 @@ export function getLast7Days(): string[] {
 export function getWeeklyDataByType(data: ViolenceData[]) {
   const days = getLast7Days();
   const countsByType: Record<number, number[]> = {
-    0: Array(7).fill(0),
+    // 0: Array(7).fill(0),
     1: Array(7).fill(0),
     2: Array(7).fill(0),
+    3: Array(7).fill(0),
+    4: Array(7).fill(0),
   };
 
   for (const entry of data) {
@@ -29,18 +31,23 @@ export function getWeeklyDataByType(data: ViolenceData[]) {
     days: days.map(date => formatDate(date)),
     weeklyData: [
       {
-        label: 'Child - Adult',
-        data: countsByType[0],
+        label: 'Critical',
+        data: countsByType[1],
         color: '#1976d2',
       },
       {
-        label: 'Adult - Adult',
-        data: countsByType[1],
+        label: 'High',
+        data: countsByType[2],
         color: '#4fc3f7',
       },
       {
-        label: 'Child - Child',
-        data: countsByType[2],
+        label: 'Medium',
+        data: countsByType[3],
+        color: '#b3e5fc',
+      },
+      {
+        label: 'Low',
+        data: countsByType[4],
         color: '#90a4ae',
       },
     ]

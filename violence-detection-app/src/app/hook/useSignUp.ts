@@ -41,6 +41,7 @@ export default function useSignup(): UseSignupReturn {
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || "Unexpected error");
+      throw err;
     } finally {
       setLoading(false);
     }
