@@ -109,17 +109,7 @@ const DetailViolenceVideosComponent: React.FC<DetailViolenceVideosComponentProps
                 color="primary"
                 sx={{mr:1, maxHeight: "35px"}}
                 startIcon={<CloudDownloadIcon />}
-                onClick={() => {
-                  if (video.videoPath) {
-                    const link = document.createElement("a");
-                    link.href = video.videoPath;
-                    link.setAttribute("download", video.videoName || "video.mp4");
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }
-                }}
-                
+                onClick={handleDownloadClick}
               >
                 download
               </Button>

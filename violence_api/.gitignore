@@ -1,0 +1,6 @@
+/__pycache__
+/.venv
+/model/__pycache__
+/model/.venv
+/model/weights
+yolov5s.pt

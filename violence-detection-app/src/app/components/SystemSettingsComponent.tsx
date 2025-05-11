@@ -216,14 +216,18 @@ const SystemSettingsComponent: React.FC<TabProps> = ({ session }) => {
         {clientReady && ( 
         <div className="min-h-full min-w-full my-4 ">
             <DataGrid
+            columns={columns.map((column) => ({
+              ...column,
+              headerAlign: "center",
+              align: "center",
+            }))}
             rows={data}
-            columns={columns}
             getRowId={(row) => row._id}
             pageSizeOptions={[5, 10, 20]}
             loading={loading}
             sx={{
                 "& .MuiDataGrid-cell": { justifyContent: "left", textAlign: "left" },
-                "& .MuiDataGrid-columnHeaderTitle": { textAlign: "left" },
+                "& .MuiDataGrid-columnHeaderTitle": {justifyContent: "center",  textAlign: "center" },
             }}
             />
         </div>
