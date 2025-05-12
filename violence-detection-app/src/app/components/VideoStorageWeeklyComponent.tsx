@@ -200,8 +200,8 @@ const VideoStorageWeeklyComponent: React.FC = () => {
             rows={filteredData}
             columns={columns.map((column) => ({
               ...column,
-              headerAlign: "left", 
-              align: "left", 
+              headerAlign: "center", 
+              align: "center", 
             }))}
             getRowId={(row) => row._id || Math.random()}
             rowHeight={112}
@@ -210,8 +210,8 @@ const VideoStorageWeeklyComponent: React.FC = () => {
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
             sx={{
-              "& .MuiDataGrid-cell": { justifyContent: "left", textAlign: "left"},
-              "& .MuiDataGrid-columnHeaderTitle": { textAlign: "left" }, 
+              "& .MuiDataGrid-cell": { justifyContent: "center", textAlign: "center"},
+              "& .MuiDataGrid-columnHeaderTitle": { textAlign: "center" }, 
               minHeight: "74vh",
             }}
             loading={loading}

@@ -42,7 +42,7 @@ export default function summary() {
   return (
     <div className="bg-[#fafafa] min-h-full">
       <TabsComponent session={session} />
-      <div className="mx-[104px]"> 
+      <div className="mx-[104px]  pt-12"> 
         <DashboardComponent/>
       </div>
     </div>

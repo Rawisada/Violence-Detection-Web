@@ -422,7 +422,7 @@ export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (recorder.state === "recording") {
         recorder.stop(); 
       }
-    }, 3000); // 3 วินาที
+    }, 5000); // 3 วินาที
   };
 
   const toggleCamera = async () => {

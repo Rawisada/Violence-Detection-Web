@@ -71,8 +71,14 @@ export default function TabsComponent({ session }: TabProps) {
         paddingLeft: 2,
         paddingRight: 5,
         boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-        zIndex: 10,
-        position: "sticky" 
+        // zIndex: 10,
+        // position: "sticky" 
+        zIndex: 1200,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: "white"
         }}
       >
         <div className="p-1 flex items-center justify-center max-w-10 max-h-10 mr-5">

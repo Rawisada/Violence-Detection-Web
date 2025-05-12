@@ -184,8 +184,8 @@ const AdministrationComponent: React.FC = () => {
           pageSizeOptions={[5, 10, 20]}
           loading={loading}
           sx={{
-              "& .MuiDataGrid-cell": { justifyContent: "left", textAlign: "left" },
-              "& .MuiDataGrid-columnHeaderTitle": { textAlign: "left" },
+              "& .MuiDataGrid-cell": { justifyContent: "center", textAlign: "center" },
+              "& .MuiDataGrid-columnHeaderTitle": { textAlign: "center" },
           }}
           />
       </div>

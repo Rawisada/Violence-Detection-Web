@@ -44,7 +44,7 @@ export default function videoDetailWeekly({ params }: { params: Promise<{ videoN
   return (
     <div className="bg-[#fafafa] min-h-full">
       <TabsComponent session={session} />
-      <div className="mx-[104px]">
+      <div className="mx-[104px]  pt-12">
           <DetailWeeklyVideosComponent videoName={videoName}/>
       </div>
     </div>

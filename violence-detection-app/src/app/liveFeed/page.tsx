@@ -41,7 +41,7 @@ export default function LiveFeedPage() {
   return (
     <div className="bg-[#fafafa]">
       <TabsComponent session={session} />
-      <div className="mx-[104px]">
+      <div className="mx-[104px] pt-12">
         <CameraProvider>
           <LiveFeedComponent />
         </CameraProvider>

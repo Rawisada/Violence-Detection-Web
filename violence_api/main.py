@@ -62,7 +62,7 @@ async def detect_segments(file: UploadFile = File(...)):
     with torch.no_grad():
         output = lstm_model(input_tensor)
         print(output)
-        is_violence = output.item() > 0.013
+        is_violence = output.item() > 0.015
 
     result = {
         "violence": is_violence,

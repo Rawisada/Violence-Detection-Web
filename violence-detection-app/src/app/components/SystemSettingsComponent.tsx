@@ -226,7 +226,7 @@ const SystemSettingsComponent: React.FC<TabProps> = ({ session }) => {
             pageSizeOptions={[5, 10, 20]}
             loading={loading}
             sx={{
-                "& .MuiDataGrid-cell": { justifyContent: "left", textAlign: "left" },
+                "& .MuiDataGrid-cell": { justifyContent: "center", textAlign: "center" },
                 "& .MuiDataGrid-columnHeaderTitle": {justifyContent: "center",  textAlign: "center" },
             }}
             />

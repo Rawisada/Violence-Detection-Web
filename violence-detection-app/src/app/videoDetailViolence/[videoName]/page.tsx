@@ -44,7 +44,7 @@ export default function videoDetailViolence({ params }: { params: Promise<{ vide
   return (
     <div className="bg-[#fafafa] min-h-full">
       <TabsComponent session={session} />
-      <div className="mx-[104px]">
+      <div className="mx-[104px]  pt-12">
           <DetailViolenceVideosComponent videoName={videoName}/>
       </div>
     </div>

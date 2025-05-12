@@ -43,7 +43,7 @@ export default function videoStorageViolence() {
   return (
     <div className="bg-[#fafafa] min-h-full">
       <TabsComponent session={session} />
-      <div className="mx-[104px]"> 
+      <div className="mx-[104px]  pt-12"> 
         <VideoStorageComponent/>
       </div>
     </div>
