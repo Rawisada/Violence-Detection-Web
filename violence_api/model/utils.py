@@ -4,56 +4,85 @@ from typing import List
 import tempfile
 import os
 
-def compute_dense_optical_flow_stack(frame_stack: List[np.ndarray]):
-    optical_flows = []
-    prev_gray = cv2.cvtColor(cv2.resize(frame_stack[0], (224, 224)), cv2.COLOR_BGR2GRAY)
-    for i in range(1, len(frame_stack)):
-        gray = cv2.cvtColor(cv2.resize(frame_stack[i], (224, 224)), cv2.COLOR_BGR2GRAY)
-        flow_fwd = cv2.calcOpticalFlowFarneback(prev_gray, gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-        flow_bwd = cv2.calcOpticalFlowFarneback(gray, prev_gray, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-        flow_diff = np.linalg.norm(flow_fwd + flow_bwd, axis=2)
-        flow_valid_mask = flow_diff < 1.0
-        flow_combined = (flow_fwd - flow_bwd) / 2.0
-        mean_flow = np.mean(flow_combined, axis=(0, 1), keepdims=True)
-        flow_combined -= mean_flow
-        flow_x = flow_combined[..., 0]
-        flow_y = flow_combined[..., 1]
-        mag, _ = cv2.cartToPolar(flow_x, flow_y)
+FRAME_STACK_SIZE = 150
+IMG_SIZE = 224
 
-        dense_optical_flow = np.zeros((224, 224, 3), dtype=np.float32)
-        dense_optical_flow[..., 0] = flow_x * flow_valid_mask
-        dense_optical_flow[..., 1] = flow_y * flow_valid_mask
-        dense_optical_flow[..., 2] = mag * flow_valid_mask
-        optical_flows.append(dense_optical_flow)
-        prev_gray = gray
+def compute_dense_optical_flow_stack(frame_stack):
 
-    if not optical_flows:
-        return None
+    flows = []
+    for i in range(0, len(frame_stack)-1):
 
-    stacked_flow = np.mean(np.stack(optical_flows), axis=0)
-    stacked_flow = cv2.normalize(stacked_flow, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-    return stacked_flow
+        prev = cv2.resize(frame_stack[i], (IMG_SIZE, IMG_SIZE))
+        next = cv2.resize(frame_stack[i + 1], (IMG_SIZE, IMG_SIZE))
 
-def extract_frames_from_video(video_bytes, num_frames=None):
-    # เขียนไฟล์ชั่วคราว
+        prev_gray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
+        next_gray = cv2.cvtColor(next, cv2.COLOR_BGR2GRAY)
+
+        flow = cv2.calcOpticalFlowFarneback(
+            prev_gray, next_gray,
+            None,
+            pyr_scale=0.5,
+            levels=3,
+            winsize=15,
+            iterations=3,
+            poly_n=5,
+            poly_sigma=1.2,
+            flags=1
+        )
+
+        dx = flow[..., 0]
+        dy = flow[..., 1]
+
+        mean_dx = np.mean(dx)
+        mean_dy = np.mean(dy)
+
+        flow[..., 0] = np.where(dx >= mean_dx, dx - mean_dx, 0)
+        flow[..., 1] = np.where(dy >= mean_dy, dy - mean_dy, 0)
+
+        flow[..., 0] = cv2.normalize(flow[..., 0],None,0,255,cv2.NORM_MINMAX)
+        flow[..., 1] = cv2.normalize(flow[..., 1],None,0,255,cv2.NORM_MINMAX)
+
+        flows.append(flow)
+
+        del prev, next, prev_gray, next_gray, flow, dx, dy
+
+
+    return np.array(flows, dtype=np.float32)
+
+
+def extract_frames_from_video(video_bytes, resize_shape=(224, 224)):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmpfile:
         tmpfile.write(video_bytes)
         tmp_path = tmpfile.name
 
     cap = cv2.VideoCapture(tmp_path)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
     frames = []
     count = 0
 
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
+            print(f"Frame {count} could not be read.")
             break
-        frames.append(frame)
+        resized_frame = cv2.resize(frame, resize_shape)
+        frames.append(resized_frame)
         count += 1
-        if num_frames is not None and count >= num_frames:
-            break
 
     cap.release()
-    os.remove(tmp_path)  # ลบไฟล์ชั่วคราว
-
+    os.remove(tmp_path)
     return frames if frames else None
+
+def pad_or_trim_frames(frames, target_length=150):
+    current_len = len(frames)
+    if current_len >= target_length:
+        return frames[:target_length]
+    padded_frames = frames.copy()
+    while len(padded_frames) < target_length:
+        remaining = target_length - len(padded_frames)
+        mirrored = frames[::-1][:remaining]
+        padded_frames.extend(mirrored)
+
+    return padded_frames

@@ -5,7 +5,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import useViolenceData from "@/app/hook/useDataLiveFeed";
 import { Button, CircularProgress } from "@mui/material";
-import { VIOLENCE_OPTIONS, VIOLENCE_TYPES } from "@/constants/violenceType";
+import { COLOR_MAP, VIOLENCE_OPTIONS, VIOLENCE_TYPES } from "@/constants/violenceType";
 import { formatDate, formatTime } from "@/lib/formate";
 import useDataCamera from "../hook/useDataCamera";
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
@@ -105,7 +105,7 @@ const LiveFeedComponent: React.FC = () => {
             mx: "auto",   
           }}
         >
-          {cameraActive ? "ปิดกล้อง" : "เปิดกล้อง"}
+          {cameraActive ? "Close Camera" : "Open Camera"}
         </Button>
 
       </Box>
@@ -169,7 +169,10 @@ const LiveFeedComponent: React.FC = () => {
                 </Box>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="subtitle1">
-                    Type: <strong>{VIOLENCE_TYPES[item.type]}</strong>
+                    Type: :&nbsp;
+                      <Typography component="span" sx={{ color: COLOR_MAP[item.type], fontWeight: "bold" }}>
+                        {VIOLENCE_TYPES[item.type]}
+                      </Typography>
                   </Typography>
                   <Typography variant="body2">Date: {formatDate(item.date)}</Typography>
                   <Typography variant="body2">Time: {formatTime(item.time)}</Typography>

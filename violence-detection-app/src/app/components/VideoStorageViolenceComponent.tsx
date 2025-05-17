@@ -60,7 +60,7 @@ const columns: GridColDef<ViolenceData>[] = [
   },
   {
     field: "type",
-    headerName: "Person",
+    headerName: "Type",
     width: 120,
     disableColumnMenu: true,
     valueGetter: (value, row) =>

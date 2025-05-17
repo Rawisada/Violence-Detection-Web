@@ -100,9 +100,6 @@ const DetailViolenceVideosComponent: React.FC<DetailViolenceVideosComponentProps
                 <Typography variant="body1" sx={{ color: 'black', fontWeight: 'medium' }}>
                   File Size: {formatFileSize(video.fileSize)}
                 </Typography>
-                <Typography variant="body1" sx={{ color: 'black', fontWeight: 'medium' }}>
-                  Path: {video.videoPath}
-                </Typography>
                 </div>
               <Button
                 variant="contained"

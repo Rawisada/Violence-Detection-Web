@@ -1,4 +1,5 @@
 import { ViolenceData } from "@/app/types/ViolenceVideosTypes";
+import { COLOR_MAP, VIOLENCE_TYPES } from "@/constants/violenceType";
 import { formatDate } from "@/lib/formate";
 import { subDays, format } from "date-fns";
 
@@ -12,7 +13,6 @@ export function getLast7Days(): string[] {
 export function getWeeklyDataByType(data: ViolenceData[]) {
   const days = getLast7Days();
   const countsByType: Record<number, number[]> = {
-    // 0: Array(7).fill(0),
     1: Array(7).fill(0),
     2: Array(7).fill(0),
     3: Array(7).fill(0),
@@ -27,29 +27,11 @@ export function getWeeklyDataByType(data: ViolenceData[]) {
   }
 
   return {
-    // days: days.map(date => format(new Date(date), 'EEE').toUpperCase()), // ['MON', 'TUE', ...]
     days: days.map(date => formatDate(date)),
-    weeklyData: [
-      {
-        label: 'Critical',
-        data: countsByType[1],
-        color: '#1976d2',
-      },
-      {
-        label: 'High',
-        data: countsByType[2],
-        color: '#4fc3f7',
-      },
-      {
-        label: 'Medium',
-        data: countsByType[3],
-        color: '#b3e5fc',
-      },
-      {
-        label: 'Low',
-        data: countsByType[4],
-        color: '#90a4ae',
-      },
-    ]
+    weeklyData: [1, 2, 3, 4].map((type) => ({
+      label: VIOLENCE_TYPES[type],
+      data: countsByType[type],
+      color: COLOR_MAP[type],
+    })),
   };
 }

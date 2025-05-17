@@ -1,5 +1,6 @@
 import { parseISO, getMonth, getYear } from "date-fns";
 import { ViolenceData } from "@/app/types/ViolenceVideosTypes";
+import { COLOR_MAP, VIOLENCE_TYPES } from "@/constants/violenceType";
 
 // ฟังก์ชันหลัก
 export const getAnnualChartData = (data: ViolenceData[]) => {
@@ -30,24 +31,10 @@ export const getAnnualChartData = (data: ViolenceData[]) => {
   return result;
 };
 
-// ช่วยแปลงประเภทเป็น label
-function getLabelByType(type: number) {
-  switch (type) {
-    case 1: return "Critical";
-    case 2: return "High";
-    case 3: return "Medium";
-    case 4: return "Low";
-    default: return "Unknown";
-  }
+export function getColorByType(type: number): string {
+  return COLOR_MAP[type] || "#ccc";
 }
 
-// Helper แปลง typeId เป็นสี
-function getColorByType(type: number) {
-  switch (type) {
-    case 1: return "#1976d2";
-    case 2: return "#4fc3f7";
-    case 3: return "#b3e5fc";
-    case 4: return "#90a4ae";
-    default: return "#ccc";
-  }
+export function getLabelByType(type: number): string {
+  return VIOLENCE_TYPES[type] || "Unknown";
 }

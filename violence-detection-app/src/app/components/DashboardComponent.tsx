@@ -5,7 +5,7 @@ import { Box, Card, Typography, Tabs, Tab, CircularProgress } from "@mui/materia
 import { PieChart } from '@mui/x-charts/PieChart';
 import { LineChart } from '@mui/x-charts/LineChart';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import { VIOLENCE_TYPES } from "@/constants/violenceType";
+import { COLOR_MAP, VIOLENCE_TYPES } from "@/constants/violenceType";
 import useDataViolenceVideos from "../hook/useDataViolenceVideos";
 import useDataViolenceVideosAll from "../hook/useDataViolenceVideosAll";
 import { getWeeklyDataByType } from "@/utils/getWeeklyChartData";
@@ -36,13 +36,6 @@ const DashboardComponent: React.FC = () => {
     const { data: violenceData, loading } = useDataViolenceVideos();
     const { data: violenceAlls, loading: loadingAll } = useDataViolenceVideosAll();
 
-    const colorMapping : Record<number, string> = {
-        1: "#1976d2",
-        2: "#4fc3f7",
-        3: "#b3e5fc",
-        4: "#90a4ae",
-    };
-
     const totalIncidents = violenceData.length;
     const incidentsByType = [1, 2, 3, 4].map((typeId) => {
         const count = violenceData.filter((item) => item.type === typeId).length;
@@ -50,16 +43,9 @@ const DashboardComponent: React.FC = () => {
         id: typeId,
         value: count,
         label: VIOLENCE_TYPES[typeId],
-        color: colorMapping[typeId],
+        color: COLOR_MAP[typeId],
         };
     });
-
-    // const {days, weeklyData } = getWeeklyDataByType(filteredData);
-    // const monthlyData = getMonthlyChartData(filteredData);
-    // const annualChartData = getAnnualChartData(filteredData);
-    // const totalYearly = annualChartData.reduce((sum, type) => {
-    //     return sum + type.data.reduce((acc, val) => acc + val, 0);
-    //   }, 0);
 
     const { days, weeklyData } = useMemo(() => {
         if (!filteredData || filteredData.length === 0) {
@@ -132,7 +118,7 @@ const DashboardComponent: React.FC = () => {
                 textAlign: "center",
             }}>
                 <Typography variant="h4" sx={{fontWeight: 'bold' }}>{totalIncidents}</Typography>
-                <Typography variant="body2">Total Violent Incidents</Typography>
+                <Typography variant="body2">Total Violence</Typography>
             </Card>
             {incidentsByType.map((item) => (
             <Card key={item.id} sx={{
@@ -144,9 +130,9 @@ const DashboardComponent: React.FC = () => {
                 alignItems: "center",
                 textAlign: "center",
             }}>
-                <Typography variant="h4" sx={{fontWeight: 'bold' }}>{item.value}</Typography>
-                <Typography variant="body2">Total Violent of</Typography>
-                <Typography variant="body2" sx={{color: item.color}}>{item.label}</Typography>
+                <Typography variant="h4" sx={{fontWeight: 'bold'}}>{item.value}</Typography>
+                <Typography variant="body2">Total Violence of</Typography>
+                <Typography variant="body2" sx={{color: item.color, fontWeight: 'bold' }}>{item.label}</Typography>
             </Card>
             ))}
         </Box>
@@ -170,7 +156,7 @@ const DashboardComponent: React.FC = () => {
                     <Card sx={{ mb: 1, display: 'flex', borderRadius: "4px" }}>
                         <Box sx={{ width: "5%", backgroundColor: "black" }}></Box>
                         <Box sx={{ p: 2, width: "95%" }}>
-                        <Typography variant="body2">Total Weekly Violent Incidents</Typography>
+                        <Typography variant="body2">Total Weekly Violence</Typography>
                         <Typography variant="h4" sx={{ textAlign: "right", fontWeight: 'bold' }}>
                             {weeklyData.reduce((acc, cur) => acc + cur.data.reduce((a, b) => a + b, 0), 0)}
                         </Typography>
@@ -210,7 +196,7 @@ const DashboardComponent: React.FC = () => {
                 <Card sx={{ mb: 1, display: 'flex', borderRadius: "4px" }}>
                     <Box sx={{ width: "5%", backgroundColor: "black" }}></Box>
                     <Box sx={{ p: 2, width: "95%" }}>
-                    <Typography variant="body2">Total Monthly Violent Incidents</Typography>
+                    <Typography variant="body2">Total Monthly Violence</Typography>
                     <Typography variant="h4" sx={{ textAlign: "right", fontWeight: 'bold' }}>
                         {monthlyData.reduce((sum, item) => sum + item.value, 0)}
                     </Typography>
@@ -246,7 +232,7 @@ const DashboardComponent: React.FC = () => {
                     <Card sx={{ mb: 1, display: 'flex', borderRadius: "4px" }}>
                         <Box sx={{ width: "5%", backgroundColor: "black" }}></Box>
                         <Box sx={{ p: 2, width: "95%" }}>
-                        <Typography variant="body2">Total Violent Incidents</Typography>
+                        <Typography variant="body2">Total Violence</Typography>
                         <Typography variant="h4" sx={{ textAlign: "right", fontWeight: 'bold' }}>
                             {totalYearly}
                         </Typography>

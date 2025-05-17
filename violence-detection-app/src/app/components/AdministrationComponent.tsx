@@ -179,7 +179,11 @@ const AdministrationComponent: React.FC = () => {
       <div className="min-h-full min-w-full my-4 ">
           <DataGrid
           rows={filteredData}
-          columns={columns}
+          columns={columns.map((column) => ({
+              ...column,
+              headerAlign: "center",
+              align: "center",
+          }))}
           getRowId={(row) => row._id}
           pageSizeOptions={[5, 10, 20]}
           loading={loading}
