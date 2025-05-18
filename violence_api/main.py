@@ -79,7 +79,7 @@ async def detect_segments(file: UploadFile = File(...)):
     with torch.no_grad():
         output = model.predict(features)[0][0]
         print(output)
-        is_violence = output.item() >= 0.58
+        is_violence = output.item() >= 0.6
 
     response_data  = {
         "violence": is_violence,
@@ -87,7 +87,7 @@ async def detect_segments(file: UploadFile = File(...)):
     }
 
     if is_violence:
-        for i in range(0, len(frame_stack) - 1):
+        for i in range(0, len(frame_stack) - 1, 2):
             frame = frame_stack[i]
             human_boxes = detect_human_yolov5(frame)
             head_boxes = detect_head_yolo(frame, head_threshold) if human_boxes else []
@@ -112,9 +112,9 @@ async def detect_segments(file: UploadFile = File(...)):
                     body_height = y_max - y_min
                     bhr = round(body_height / head_height, 2) if head_height > 0 else 0
 
-                    if bhr < 2:
+                    if bhr < 3:
                         label = "Human"
-                    elif bhr < 4:
+                    elif bhr < 6:
                         label = "Child"
                     else:
                         label = "Adult"

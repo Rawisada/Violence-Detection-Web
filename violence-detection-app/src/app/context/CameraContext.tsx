@@ -45,7 +45,7 @@ export const CameraProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const result = await res.json();
       return result;
     } catch (err) {
-      // ถ้า fetch ล้มเหลวเพราะกล้องถูกปิด ไม่ต้องทำอะไร
+      
       return { violence: false };
     }
   };

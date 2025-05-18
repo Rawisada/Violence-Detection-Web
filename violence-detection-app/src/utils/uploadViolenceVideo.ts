@@ -114,6 +114,10 @@ export const uploadViolenceVideo = async (videoBlob: Blob, meta: UploadMeta) => 
     if (latest?.videoName) {
       mergeWithPrevious = true;
       originalVideoName = latest.videoName;
+      if (typeof latest?.type === "number" && latest.type < meta.type) {
+        console.log("update", meta.type, "to", latest.type )
+        meta.type = latest.type;
+      }
     }
   }
 
@@ -125,6 +129,18 @@ export const uploadViolenceVideo = async (videoBlob: Blob, meta: UploadMeta) => 
   const formData = new FormData();
   formData.append("videoName", `${videoName}.mp4`);
   formData.append("video", videoBlob, `${videoName}.mp4`);
+
+  // if (mergeWithPrevious) {
+  //   const metaRes = await fetch(`/api/violence?videoName=${originalVideoName}`);
+  //   const metaJson = await metaRes.json();
+  //   console.log("metaJson",metaJson.data[0])
+  //   if (metaRes.ok && metaJson?.type) {
+  //     console.log("metaJson.type",metaJson.data[0].type)
+  //     if(metaJson.data[0].type < meta.type){
+  //       meta.type = metaJson.data[0].type
+  //     }
+  //   }
+  //  }
 
   if (mergeWithPrevious) {
     const mergeResponse = await fetch("/api/mergeViolenceVideos", {
